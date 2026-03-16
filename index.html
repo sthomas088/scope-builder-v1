@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scope Builder V1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <h1>Scope Builder V1</h1>
+      <p class="subtitle">Biology consulting scope of work generator</p>
+
+      <section class="card" aria-labelledby="project-info-heading">
+        <h2 id="project-info-heading">Project Information</h2>
+        <div class="grid">
+          <label>
+            Project Name
+            <input type="text" id="projectName" required />
+          </label>
+          <label>
+            Client
+            <input type="text" id="client" required />
+          </label>
+          <label>
+            Location
+            <input type="text" id="location" required />
+          </label>
+          <label>
+            Prepared By
+            <input type="text" id="preparedBy" required />
+          </label>
+          <label>
+            Date
+            <input type="date" id="scopeDate" required />
+          </label>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="bio-tasks-heading">
+        <h2 id="bio-tasks-heading">Biology Tasks</h2>
+        <div id="taskList" class="task-list" role="group" aria-label="Biology task options"></div>
+      </section>
+
+      <div class="actions">
+        <button id="generateBtn" type="button">Generate Scope</button>
+        <button id="exportBtn" type="button" disabled>Export to Word</button>
+      </div>
+
+      <section class="card" aria-labelledby="preview-heading">
+        <h2 id="preview-heading">Scope Preview</h2>
+        <pre id="scopePreview" class="preview">Complete project information, select tasks, and click "Generate Scope".</pre>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
