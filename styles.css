@@ -1,0 +1,297 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #0f172a;
+  background-color: #f1f5f9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 1.5rem;
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: 0.25rem;
+  color: #475569;
+}
+
+h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+  color: #334155;
+}
+
+.top-controls {
+  margin-top: 0.75rem;
+  max-width: calc((100% - 1rem) * 0.4545);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.control-block label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.workspace {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(620px, 1.6fr);
+  align-items: start;
+}
+
+.left-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.right-panel {
+  margin-top: 0;
+  min-height: 84vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='date'],
+select,
+textarea,
+.scope-editor {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  font: inherit;
+  background: #fff;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.task-category-label {
+  margin: 0 0 0.6rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.task-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.task-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+
+.task-group {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.task-group + .task-group {
+  margin-top: 0.35rem;
+}
+
+.task-group-header {
+  width: 100%;
+  border: 0;
+  background: #f8fafc;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.task-group-arrow {
+  display: inline-block;
+  transition: transform 0.16s ease;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.task-group.expanded .task-group-arrow {
+  transform: rotate(90deg);
+}
+
+.task-group-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.task-group-panel {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem 0.8rem;
+}
+
+.task-group.collapsed .task-group-panel {
+  display: none;
+}
+
+.task-group-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.placeholder-note {
+  margin: 0;
+  padding: 0.65rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.65rem 0.95rem;
+  font: inherit;
+  font-weight: 600;
+  background-color: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+
+.preview-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.preview-tab {
+  background: #e2e8f0;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.7rem;
+}
+
+.preview-tab.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.preview-tab:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.tab-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+}
+
+.tab-panel.active {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.disabled-message {
+  margin: 0 0 0.6rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.scope-editor {
+  width: 100%;
+  flex: 1;
+  min-height: 700px;
+  height: 100%;
+  resize: vertical;
+  overflow: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #0f172a;
+}
+
+@media (max-width: 980px) {
+  .top-controls {
+    max-width: 100%;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel {
+    min-height: auto;
+  }
+
+  .scope-editor {
+    min-height: 520px;
+  }
+}
+
+.hidden {
+  display: none;
+}
