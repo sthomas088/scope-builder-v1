@@ -1,20 +1,24 @@
 const state = {
   disciplines: [],
   selectedTaskIds: new Set(),
-  activePreviewTab: 'coverLetter',
+  currentDocumentMode: 'preview',
+  previousEditorContent: '',
 };
 
-const DEFAULT_EDITOR_TEXT = 'Select a discipline, complete project information, and click "Generate Scope".';
+const DEFAULT_EDITOR_TEXT =
+  'Select tasks and review the live preview. Then click "Send Preview → Editor".';
 
 const els = {
   discipline: document.getElementById('discipline'),
   coverLetterType: document.getElementById('coverLetterType'),
-  coverLetterTab: document.getElementById('coverLetterTab'),
-  attachmentTab: document.getElementById('attachmentTab'),
-  coverLetterPanel: document.getElementById('coverLetterPanel'),
-  attachmentPanel: document.getElementById('attachmentPanel'),
-  coverLetterDisabledMessage: document.getElementById('coverLetterDisabledMessage'),
-  coverLetterEditor: document.getElementById('coverLetterEditor'),
+  previewModeBtn: document.getElementById('previewModeBtn'),
+  editorModeBtn: document.getElementById('editorModeBtn'),
+  sendPreviewToEditorBtn: document.getElementById('sendPreviewToEditorBtn'),
+  restorePreviousEditorBtn: document.getElementById('restorePreviousEditorBtn'),
+  documentModeMessage: document.getElementById('documentModeMessage'),
+  previewDocumentPanel: document.getElementById('previewDocumentPanel'),
+  editorDocumentPanel: document.getElementById('editorDocumentPanel'),
+  previewDocument: document.getElementById('previewDocument'),
   taskCategoryLabel: document.getElementById('taskCategoryLabel'),
   taskList: document.getElementById('taskList'),
   generateBtn: document.getElementById('generateBtn'),
@@ -57,7 +61,8 @@ function sanitizeForFilename(input) {
 }
 
 function editorHasExportableContent() {
-  return els.scopeEditor.value.trim() && els.scopeEditor.value.trim() !== DEFAULT_EDITOR_TEXT;
+  const value = els.scopeEditor.value.trim();
+  return value && value !== DEFAULT_EDITOR_TEXT;
 }
 
 function getCountyValue() {
@@ -94,24 +99,6 @@ function updateRegionalFrameworkVisibility() {
   }
 }
 
-function setActivePreviewTab(tabName) {
-  if (tabName === 'coverLetter' && els.coverLetterType.value === 'none') {
-    state.activePreviewTab = 'attachment';
-  } else {
-    state.activePreviewTab = tabName;
-  }
-
-  const coverActive = state.activePreviewTab === 'coverLetter';
-  els.coverLetterTab.classList.toggle('active', coverActive);
-  els.coverLetterTab.setAttribute('aria-selected', String(coverActive));
-  els.coverLetterPanel.classList.toggle('active', coverActive);
-
-  const attachmentActive = state.activePreviewTab === 'attachment';
-  els.attachmentTab.classList.toggle('active', attachmentActive);
-  els.attachmentTab.setAttribute('aria-selected', String(attachmentActive));
-  els.attachmentPanel.classList.toggle('active', attachmentActive);
-}
-
 function updateCoverLetterTypeVisibility() {
   const type = els.coverLetterType.value;
   const showAcreage = type === 'standard' || type === 'expanded';
@@ -125,17 +112,6 @@ function updateCoverLetterTypeVisibility() {
   if (!showAcreage) els.acreage.value = '';
   if (!showApn) els.apn.value = '';
   if (!showGeneralUnderstanding) els.generalProjectUnderstanding.value = '';
-
-  const coverLetterDisabled = type === 'none';
-  els.coverLetterTab.disabled = coverLetterDisabled;
-  els.coverLetterDisabledMessage.classList.toggle('hidden', !coverLetterDisabled);
-  els.coverLetterEditor.classList.toggle('hidden', coverLetterDisabled);
-
-  if (coverLetterDisabled && state.activePreviewTab === 'coverLetter') {
-    setActivePreviewTab('attachment');
-  } else {
-    setActivePreviewTab(state.activePreviewTab);
-  }
 }
 
 async function loadTaskLibrary() {
@@ -200,10 +176,15 @@ function renderCategoryGroup(categoryName, tasks, index) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.value = task.id;
+      checkbox.checked = state.selectedTaskIds.has(task.id);
 
       checkbox.addEventListener('change', (event) => {
-        if (event.target.checked) state.selectedTaskIds.add(task.id);
-        else state.selectedTaskIds.delete(task.id);
+        if (event.target.checked) {
+          state.selectedTaskIds.add(task.id);
+        } else {
+          state.selectedTaskIds.delete(task.id);
+        }
+        refreshPreviewDocument();
       });
 
       const textWrap = document.createElement('span');
@@ -227,11 +208,11 @@ function renderCategoryGroup(categoryName, tasks, index) {
 function renderTaskSection() {
   const discipline = getSelectedDiscipline();
   state.selectedTaskIds.clear();
-  els.exportBtn.disabled = !editorHasExportableContent();
 
   if (!discipline) {
     els.taskCategoryLabel.textContent = 'Select a discipline to load tasks.';
     els.taskList.innerHTML = '';
+    refreshPreviewDocument();
     return;
   }
 
@@ -243,54 +224,25 @@ function renderTaskSection() {
     note.className = 'placeholder-note';
     note.textContent = discipline.placeholderMessage || 'This discipline is a placeholder for future implementation.';
     els.taskList.appendChild(note);
+    refreshPreviewDocument();
     return;
   }
 
   Array.from(getDisciplineCategoryMap(discipline).entries()).forEach(([categoryName, tasks], index) => {
     els.taskList.appendChild(renderCategoryGroup(categoryName, tasks, index));
   });
+
+  refreshPreviewDocument();
 }
 
 function getSelectedTasks(discipline) {
-  const allTasks = Array.isArray(discipline.tasks) ? discipline.tasks : [];
+  const allTasks = Array.isArray(discipline?.tasks) ? discipline.tasks : [];
   return allTasks.filter((task) => state.selectedTaskIds.has(task.id));
-}
-
-function buildAttachmentAText(project, selectedTasks) {
-  const taskSection = selectedTasks
-    .map((task, index) => `${index + 1}. ${task.name}\n${task.description}`)
-    .join('\n\n');
-
-  const deliverables = selectedTasks
-    .flatMap((task) => {
-      if (!task.deliverables) return [];
-      if (Array.isArray(task.deliverables)) return task.deliverables;
-      return [task.deliverables];
-    })
-    .filter(Boolean);
-
-  const deliverablesSection =
-    deliverables.length > 0
-      ? `\n\nDELIVERABLES\n${deliverables.map((item) => `- ${item}`).join('\n')}`
-      : '';
-
-  return `ATTACHMENT A\nSCOPE OF WORK\nBIOLOGICAL CONSULTING SERVICES\n${project.projectName}\n\n${taskSection}${deliverablesSection}`;
-}
-
-function buildCoverLetterText(project) {
-  if (project.coverLetterType === 'none') {
-    return '';
-  }
-
-  const locationText = project.address
-    ? project.address
-    : [project.city, project.county, project.state].filter(Boolean).join(', ');
-
-  return `${project.date}\n\n${project.client}\n${project.contactName || ''}\n${project.clientAddress || ''}\n\nSubject: ${project.subjectLine || project.projectName}\n\nDear ${project.contactName || 'Client'},\n\nPlease find attached Attachment A, Scope of Work for biological consulting services for the ${project.projectName} project located at ${locationText}.\n\nWe appreciate the opportunity to support your team.\n`;
 }
 
 function getProjectInfo() {
   const coverLetterType = els.coverLetterType.value;
+
   return {
     projectName: els.projectName.value.trim(),
     address: els.projectAddress.value.trim(),
@@ -307,7 +259,6 @@ function getProjectInfo() {
     apn: els.apn.value.trim(),
     generalProjectUnderstanding: els.generalProjectUnderstanding.value.trim(),
     coverLetterType,
-    coverLetterTypeLabel: coverLetterType.charAt(0).toUpperCase() + coverLetterType.slice(1),
     date: els.scopeDate.value || todayIsoDate(),
     signatories: [
       { name: els.signatory1Name.value.trim(), title: els.signatory1Title.value.trim() },
@@ -316,21 +267,248 @@ function getProjectInfo() {
   };
 }
 
-function validate(project, discipline, selectedTasks) {
+function escapeHtml(input) {
+  return String(input ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function formatDisplayDate(dateValue) {
+  if (!dateValue) return '';
+  const date = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateValue;
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function buildCoverLetterText(project) {
+  if (project.coverLetterType === 'none') {
+    return '';
+  }
+
+  const lines = [];
+  lines.push(formatDisplayDate(project.date));
+
+  if (project.client) lines.push(project.client);
+  if (project.contactName) lines.push(project.contactName);
+  if (project.clientAddress) lines.push(project.clientAddress);
+
+  const subjectText = project.subjectLine || project.projectName || 'Scope of Work';
+  lines.push(`Subject: ${subjectText}`);
+
+  const greetingName = project.contactName || 'Client';
+  lines.push(`Dear ${greetingName},`);
+
+  const locationText =
+    project.address ||
+    [project.city, project.county, project.state].filter(Boolean).join(', ') ||
+    'the project site';
+
+  let body =
+    `Please find Attachment A, Scope of Work for biological consulting services for the ${project.projectName || 'project'} ` +
+    `located at ${locationText}.`;
+
+  if (project.coverLetterType === 'standard' || project.coverLetterType === 'expanded') {
+    if (project.acreage) {
+      body += ` The site encompasses approximately ${project.acreage}.`;
+    }
+    if (project.apn) {
+      body += ` Associated APN: ${project.apn}.`;
+    }
+  }
+
+  if (project.coverLetterType === 'expanded' && project.generalProjectUnderstanding) {
+    body += ` ${project.generalProjectUnderstanding}`;
+  }
+
+  lines.push(body);
+  lines.push('We appreciate the opportunity to support your team.');
+
+  return lines.join('\n\n');
+}
+
+function buildAttachmentAText(project, selectedTasks) {
+  const header = [
+    'ATTACHMENT A',
+    'SCOPE OF WORK',
+    'BIOLOGICAL CONSULTING SERVICES',
+    project.projectName || 'Project',
+  ].join('\n');
+
+  const taskSection = selectedTasks.length
+    ? selectedTasks
+        .map((task, index) => {
+          const titleLine = `${index + 1}. ${task.name}`;
+          return `${titleLine}\n${task.description}`;
+        })
+        .join('\n\n')
+    : 'No tasks selected.';
+
+  const deliverables = selectedTasks
+    .flatMap((task) => {
+      if (!task.deliverables) return [];
+      if (Array.isArray(task.deliverables)) return task.deliverables;
+      return [task.deliverables];
+    })
+    .filter(Boolean);
+
+  const deliverablesSection =
+    deliverables.length > 0
+      ? `\n\nDELIVERABLES\n${deliverables.map((item) => `- ${item}`).join('\n')}`
+      : '';
+
+  return `${header}\n\n${taskSection}${deliverablesSection}`;
+}
+
+function buildFullDocumentText(project, selectedTasks) {
+  const coverLetterText = buildCoverLetterText(project);
+  const attachmentText = buildAttachmentAText(project, selectedTasks);
+
+  if (!coverLetterText) return attachmentText;
+
+  return `${coverLetterText}\n\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n\n${attachmentText}`;
+}
+
+function buildPreviewDocumentHtml(project, selectedTasks) {
+  const coverLetterText = buildCoverLetterText(project);
+  const coverLetterParagraphs = coverLetterText
+    ? coverLetterText
+        .split(/\n\s*\n/)
+        .map((paragraph) => `<p class="document-paragraph">${escapeHtml(paragraph)}</p>`)
+        .join('')
+    : `<p class="document-paragraph">Cover letter disabled.</p>`;
+
+  const attachmentTasksHtml = selectedTasks.length
+    ? selectedTasks
+        .map((task, index) => {
+          return `
+            <div class="document-task">
+              <div class="document-task-title">${escapeHtml(`${index + 1}. ${task.name}`)}</div>
+              <p class="document-task-text">${escapeHtml(task.description || '')}</p>
+            </div>
+          `;
+        })
+        .join('')
+    : `<p class="document-paragraph">No tasks selected.</p>`;
+
+  const deliverables = selectedTasks
+    .flatMap((task) => {
+      if (!task.deliverables) return [];
+      if (Array.isArray(task.deliverables)) return task.deliverables;
+      return [task.deliverables];
+    })
+    .filter(Boolean);
+
+  const deliverablesHtml = deliverables.length
+    ? `
+      <div class="document-deliverables">
+        <div class="document-deliverables-title">DELIVERABLES</div>
+        <ul class="document-deliverables-list">
+          ${deliverables.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+        </ul>
+      </div>
+    `
+    : '';
+
+  const coverSection = `
+    <div class="document-section">
+      ${coverLetterParagraphs}
+    </div>
+  `;
+
+  const attachmentSection = `
+    <div class="document-section">
+      <div class="document-section-title">ATTACHMENT A – SCOPE OF WORK</div>
+      ${project.projectName ? `<p class="document-paragraph">${escapeHtml(project.projectName)}</p>` : ''}
+      ${attachmentTasksHtml}
+      ${deliverablesHtml}
+    </div>
+  `;
+
+  if (project.coverLetterType === 'none') {
+    return attachmentSection;
+  }
+
+  return `
+    ${coverSection}
+    <div class="document-page-break">
+      <span class="document-page-break-label">Attachment A Begins</span>
+    </div>
+    ${attachmentSection}
+  `;
+}
+
+function setDocumentMode(mode) {
+  state.currentDocumentMode = mode;
+
+  const previewActive = mode === 'preview';
+  els.previewModeBtn.classList.toggle('active', previewActive);
+  els.previewModeBtn.setAttribute('aria-selected', String(previewActive));
+
+  els.editorModeBtn.classList.toggle('active', !previewActive);
+  els.editorModeBtn.setAttribute('aria-selected', String(!previewActive));
+
+  els.previewDocumentPanel.classList.toggle('active', previewActive);
+  els.editorDocumentPanel.classList.toggle('active', !previewActive);
+
+  els.documentModeMessage.textContent = previewActive
+    ? 'Live preview — updates automatically.'
+    : 'Editing mode — changes are not auto-synced.';
+}
+
+function refreshPreviewDocument() {
+  const discipline = getSelectedDiscipline();
+  const project = getProjectInfo();
+  const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
+
+  els.previewDocument.innerHTML = buildPreviewDocumentHtml(project, selectedTasks);
+  els.exportBtn.disabled = !editorHasExportableContent();
+}
+
+function sendPreviewToEditor() {
+  const discipline = getSelectedDiscipline();
+  const project = getProjectInfo();
+  const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
+  const newEditorText = buildFullDocumentText(project, selectedTasks);
+
+  if (els.scopeEditor.value.trim() && els.scopeEditor.value.trim() !== DEFAULT_EDITOR_TEXT) {
+    const confirmed = window.confirm(
+      'This will replace your current editor content with the latest preview. Continue?'
+    );
+    if (!confirmed) return;
+  }
+
+  state.previousEditorContent = els.scopeEditor.value;
+  els.scopeEditor.value = newEditorText;
+  els.restorePreviousEditorBtn.classList.remove('hidden');
+  els.exportBtn.disabled = false;
+  setDocumentMode('editor');
+}
+
+function restorePreviousEditorVersion() {
+  const currentContent = els.scopeEditor.value;
+  els.scopeEditor.value = state.previousEditorContent;
+  state.previousEditorContent = currentContent;
+
+  if (!editorHasExportableContent()) {
+    els.exportBtn.disabled = true;
+  }
+}
+
+function validateForExport() {
+  if (!editorHasExportableContent()) {
+    alert('Please send preview content to the editor before exporting.');
+    return false;
+  }
+
+  const discipline = getSelectedDiscipline();
   if (!discipline) {
-    alert('Please select a discipline first.');
-    return false;
-  }
-
-  const requiredFields = ['projectName', 'city', 'county', 'state', 'client'];
-  const missing = requiredFields.filter((field) => !project[field]);
-  if (missing.length > 0) {
-    alert('Please complete all project information fields before generating scope.');
-    return false;
-  }
-
-  if (discipline.status === 'active' && selectedTasks.length === 0) {
-    alert('Please select at least one task.');
+    alert('Please select a discipline before exporting.');
     return false;
   }
 
@@ -345,6 +523,7 @@ function buildFileName(projectName, discipline, date) {
 function buildDocParagraphsFromText(text) {
   const { Paragraph } = window.docx;
   const lines = text.split('\n');
+
   return lines.map((line) => {
     const trimmed = line.trim();
     if (trimmed === '') return new Paragraph({ text: '' });
@@ -356,21 +535,13 @@ function buildDocParagraphsFromText(text) {
 }
 
 async function exportToWord() {
-  const currentScopeText = els.scopeEditor.value;
-  if (!currentScopeText.trim() || currentScopeText.trim() === DEFAULT_EDITOR_TEXT) {
-    alert('Please generate or enter scope content before exporting.');
-    return;
-  }
+  if (!validateForExport()) return;
 
   const discipline = getSelectedDiscipline();
-  if (!discipline) {
-    alert('Please select a discipline before exporting.');
-    return;
-  }
-
   const { Document, Packer } = window.docx;
+
   const doc = new Document({
-    sections: [{ properties: {}, children: buildDocParagraphsFromText(currentScopeText) }],
+    sections: [{ properties: {}, children: buildDocParagraphsFromText(els.scopeEditor.value) }],
   });
 
   const blob = await Packer.toBlob(doc);
@@ -378,22 +549,42 @@ async function exportToWord() {
   saveAs(blob, buildFileName(project.projectName, discipline, project.date));
 }
 
-function handleGenerateScope() {
-  const discipline = getSelectedDiscipline();
-  const project = getProjectInfo();
-  const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
+function handleRefreshPreview() {
+  refreshPreviewDocument();
+  setDocumentMode('preview');
+}
 
-  if (!validate(project, discipline, selectedTasks)) return;
+function registerLivePreviewListeners() {
+  const fields = [
+    els.coverLetterType,
+    els.projectName,
+    els.projectAddress,
+    els.projectCity,
+    els.projectCounty,
+    els.customProjectCounty,
+    els.projectState,
+    els.regionalFramework,
+    els.customRegionalFramework,
+    els.acreage,
+    els.apn,
+    els.generalProjectUnderstanding,
+    els.client,
+    els.contactName,
+    els.contactEmail,
+    els.clientAddress,
+    els.subjectLine,
+    els.scopeDate,
+    els.signatory1Name,
+    els.signatory1Title,
+    els.signatory2Name,
+    els.signatory2Title,
+  ];
 
-  els.scopeEditor.value = buildAttachmentAText(project, selectedTasks);
-
-  if (project.coverLetterType === 'none') {
-    els.coverLetterEditor.value = '';
-  } else {
-    els.coverLetterEditor.value = buildCoverLetterText(project);
-  }
-
-  els.exportBtn.disabled = false;
+  fields.forEach((field) => {
+    if (!field) return;
+    field.addEventListener('input', refreshPreviewDocument);
+    field.addEventListener('change', refreshPreviewDocument);
+  });
 }
 
 function init() {
@@ -403,31 +594,49 @@ function init() {
   updateCountyInputVisibility();
   updateRegionalFrameworkVisibility();
   updateCoverLetterTypeVisibility();
-  setActivePreviewTab('coverLetter');
+  setDocumentMode('preview');
 
   els.discipline.addEventListener('change', renderTaskSection);
-  els.projectCounty.addEventListener('change', updateCountyInputVisibility);
-  els.regionalFramework.addEventListener('change', updateRegionalFrameworkVisibility);
-  els.coverLetterType.addEventListener('change', updateCoverLetterTypeVisibility);
+  els.projectCounty.addEventListener('change', () => {
+    updateCountyInputVisibility();
+    refreshPreviewDocument();
+  });
 
-  els.coverLetterTab.addEventListener('click', () => setActivePreviewTab('coverLetter'));
-  els.attachmentTab.addEventListener('click', () => setActivePreviewTab('attachment'));
+  els.regionalFramework.addEventListener('change', () => {
+    updateRegionalFrameworkVisibility();
+    refreshPreviewDocument();
+  });
 
-  els.generateBtn.addEventListener('click', handleGenerateScope);
+  els.coverLetterType.addEventListener('change', () => {
+    updateCoverLetterTypeVisibility();
+    refreshPreviewDocument();
+  });
+
+  els.previewModeBtn.addEventListener('click', () => setDocumentMode('preview'));
+  els.editorModeBtn.addEventListener('click', () => setDocumentMode('editor'));
+  els.sendPreviewToEditorBtn.addEventListener('click', sendPreviewToEditor);
+  els.restorePreviousEditorBtn.addEventListener('click', restorePreviousEditorVersion);
+
+  els.generateBtn.addEventListener('click', handleRefreshPreview);
+
   els.exportBtn.addEventListener('click', () => {
     exportToWord().catch((error) => {
       console.error(error);
       alert('Unable to export document. Please try again.');
     });
   });
+
   els.scopeEditor.addEventListener('input', () => {
     els.exportBtn.disabled = !editorHasExportableContent();
   });
+
+  registerLivePreviewListeners();
 
   loadTaskLibrary()
     .then(renderTaskSection)
     .catch((error) => {
       console.error(error);
+      els.previewDocument.innerHTML = '<p class="document-placeholder">Error loading task library.</p>';
       els.scopeEditor.value = 'Error loading task library.';
       els.exportBtn.disabled = true;
     });
