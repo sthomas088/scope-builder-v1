@@ -1,10 +1,12 @@
 const state = {
-  tasks: [],
+  disciplines: [],
   selectedTaskIds: new Set(),
   generatedScope: '',
 };
 
 const els = {
+  discipline: document.getElementById('discipline'),
+  taskCategoryLabel: document.getElementById('taskCategoryLabel'),
   taskList: document.getElementById('taskList'),
   generateBtn: document.getElementById('generateBtn'),
   exportBtn: document.getElementById('exportBtn'),
@@ -24,20 +26,45 @@ function sanitizeForFilename(input) {
   return input.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
 }
 
-async function loadTasks() {
+async function loadTaskLibrary() {
   const response = await fetch('tasks.json');
   if (!response.ok) {
     throw new Error('Unable to load tasks library.');
   }
 
-  state.tasks = await response.json();
-  renderTaskList();
+  const payload = await response.json();
+  state.disciplines = payload.disciplines || [];
 }
 
-function renderTaskList() {
+function getSelectedDiscipline() {
+  return state.disciplines.find((discipline) => discipline.id === els.discipline.value) || null;
+}
+
+function renderTaskSection() {
+  const discipline = getSelectedDiscipline();
+  state.selectedTaskIds.clear();
+  state.generatedScope = '';
+  els.exportBtn.disabled = true;
+
+  if (!discipline) {
+    els.taskCategoryLabel.textContent = 'Select a discipline to load tasks.';
+    els.taskList.innerHTML = '';
+    els.scopePreview.textContent = 'Select a discipline, complete project information, and click "Generate Scope".';
+    return;
+  }
+
+  els.taskCategoryLabel.textContent = discipline.taskCategory;
   els.taskList.innerHTML = '';
 
-  state.tasks.forEach((task) => {
+  if (discipline.status === 'placeholder') {
+    const note = document.createElement('p');
+    note.className = 'placeholder-note';
+    note.textContent = discipline.placeholderMessage || 'This discipline is a placeholder for future implementation.';
+    els.taskList.appendChild(note);
+    return;
+  }
+
+  discipline.tasks.forEach((task) => {
     const wrapper = document.createElement('label');
     wrapper.className = 'task-item';
 
@@ -61,22 +88,40 @@ function renderTaskList() {
   });
 }
 
-function getSelectedTasks() {
-  return state.tasks.filter((task) => state.selectedTaskIds.has(task.id));
+function getSelectedTasks(discipline) {
+  return (discipline.tasks || []).filter((task) => state.selectedTaskIds.has(task.id));
 }
 
-function buildScopeText(project, selectedTasks) {
-  const taskParagraphs = selectedTasks
-    .map((task, index) => `${index + 1}. ${task.name}: ${task.description}`)
-    .join('\n\n');
-
-  return `BIOLOGICAL CONSULTING SCOPE OF WORK
+function buildScopeText(project, discipline, selectedTasks) {
+  if (discipline.status === 'placeholder') {
+    return `${discipline.scopeTitle}
 
 Project: ${project.projectName}
 Client: ${project.client}
 Location: ${project.location}
 Prepared By: ${project.preparedBy}
 Date: ${project.date}
+Discipline: ${discipline.name}
+
+Status
+${discipline.placeholderMessage}
+
+Next Step
+Select Biology for fully implemented V1 scope generation and Word export.`;
+  }
+
+  const taskParagraphs = selectedTasks
+    .map((task, index) => `${index + 1}. ${task.name}: ${task.description}`)
+    .join('\n\n');
+
+  return `${discipline.scopeTitle}
+
+Project: ${project.projectName}
+Client: ${project.client}
+Location: ${project.location}
+Prepared By: ${project.preparedBy}
+Date: ${project.date}
+Discipline: ${discipline.name}
 
 Project Understanding
 This scope of work describes biological services to support planning, environmental review, and regulatory strategy for the ${project.projectName} project in ${project.location}. Work products will be prepared to support agency coordination and to identify biological constraints that may affect project design, scheduling, and permitting.
@@ -103,7 +148,12 @@ function getProjectInfo() {
   };
 }
 
-function validate(project, selectedTasks) {
+function validate(project, discipline, selectedTasks) {
+  if (!discipline) {
+    alert('Please select a discipline first.');
+    return false;
+  }
+
   const requiredFields = ['projectName', 'client', 'location', 'preparedBy'];
   const missing = requiredFields.filter((field) => !project[field]);
 
@@ -112,21 +162,26 @@ function validate(project, selectedTasks) {
     return false;
   }
 
-  if (selectedTasks.length === 0) {
-    alert('Please select at least one biology task.');
+  if (discipline.status === 'active' && selectedTasks.length === 0) {
+    alert('Please select at least one task.');
     return false;
   }
 
   return true;
 }
 
-function buildFileName(projectName, date) {
+function buildFileName(projectName, discipline, date) {
   const cleanProjectName = sanitizeForFilename(projectName) || 'Project';
-  return `${cleanProjectName}_BioScope_${date}.docx`;
+  return `${cleanProjectName}_${discipline.filenamePrefix}_${date}.docx`;
 }
 
 async function exportToWord() {
   if (!state.generatedScope) {
+    return;
+  }
+
+  const discipline = getSelectedDiscipline();
+  if (!discipline) {
     return;
   }
 
@@ -142,19 +197,20 @@ async function exportToWord() {
 
   const blob = await Packer.toBlob(doc);
   const project = getProjectInfo();
-  const fileName = buildFileName(project.projectName, project.date);
+  const fileName = buildFileName(project.projectName, discipline, project.date);
   saveAs(blob, fileName);
 }
 
 function handleGenerateScope() {
+  const discipline = getSelectedDiscipline();
   const project = getProjectInfo();
-  const selectedTasks = getSelectedTasks();
+  const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
 
-  if (!validate(project, selectedTasks)) {
+  if (!validate(project, discipline, selectedTasks)) {
     return;
   }
 
-  state.generatedScope = buildScopeText(project, selectedTasks);
+  state.generatedScope = buildScopeText(project, discipline, selectedTasks);
   els.scopePreview.textContent = state.generatedScope;
   els.exportBtn.disabled = false;
 }
@@ -162,6 +218,7 @@ function handleGenerateScope() {
 function init() {
   els.scopeDate.value = todayIsoDate();
 
+  els.discipline.addEventListener('change', renderTaskSection);
   els.generateBtn.addEventListener('click', handleGenerateScope);
   els.exportBtn.addEventListener('click', () => {
     exportToWord().catch((error) => {
@@ -170,10 +227,12 @@ function init() {
     });
   });
 
-  loadTasks().catch((error) => {
-    console.error(error);
-    els.scopePreview.textContent = 'Error loading task library.';
-  });
+  loadTaskLibrary()
+    .then(renderTaskSection)
+    .catch((error) => {
+      console.error(error);
+      els.scopePreview.textContent = 'Error loading task library.';
+    });
 }
 
 init();

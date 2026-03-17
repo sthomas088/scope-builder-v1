@@ -27,6 +27,10 @@ h1 {
   color: #475569;
 }
 
+.required {
+  color: #b91c1c;
+}
+
 .card {
   background: #fff;
   border: 1px solid #dbe2ea;
@@ -50,11 +54,19 @@ label {
 }
 
 input[type='text'],
-input[type='date'] {
+input[type='date'],
+select {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.6rem 0.7rem;
   font: inherit;
+  background: #fff;
+}
+
+.task-category-label {
+  margin: 0 0 0.6rem;
+  color: #475569;
+  font-size: 0.95rem;
 }
 
 .task-list {
@@ -69,6 +81,15 @@ input[type='date'] {
   padding: 0.5rem;
   border-radius: 8px;
   background: #f8fafc;
+}
+
+.placeholder-note {
+  margin: 0;
+  padding: 0.65rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 8px;
 }
 
 .actions {

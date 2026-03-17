@@ -9,11 +9,20 @@
   <body>
     <main class="app-shell">
       <h1>Scope Builder V1</h1>
-      <p class="subtitle">Biology consulting scope of work generator</p>
+      <p class="subtitle">Consulting scope of work generator</p>
 
       <section class="card" aria-labelledby="project-info-heading">
         <h2 id="project-info-heading">Project Information</h2>
         <div class="grid">
+          <label>
+            Discipline <span class="required">*</span>
+            <select id="discipline" required>
+              <option value="">Select discipline</option>
+              <option value="biology">Biology</option>
+              <option value="ceqa">CEQA</option>
+              <option value="cultural">Cultural</option>
+            </select>
+          </label>
           <label>
             Project Name
             <input type="text" id="projectName" required />
@@ -37,9 +46,10 @@
         </div>
       </section>
 
-      <section class="card" aria-labelledby="bio-tasks-heading">
-        <h2 id="bio-tasks-heading">Biology Tasks</h2>
-        <div id="taskList" class="task-list" role="group" aria-label="Biology task options"></div>
+      <section class="card" aria-labelledby="tasks-heading">
+        <h2 id="tasks-heading">Discipline Tasks</h2>
+        <p id="taskCategoryLabel" class="task-category-label">Select a discipline to load tasks.</p>
+        <div id="taskList" class="task-list" role="group" aria-label="Task options"></div>
       </section>
 
       <div class="actions">
@@ -49,7 +59,7 @@
 
       <section class="card" aria-labelledby="preview-heading">
         <h2 id="preview-heading">Scope Preview</h2>
-        <pre id="scopePreview" class="preview">Complete project information, select tasks, and click "Generate Scope".</pre>
+        <pre id="scopePreview" class="preview">Select a discipline, complete project information, and click "Generate Scope".</pre>
       </section>
     </main>
 

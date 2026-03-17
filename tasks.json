@@ -1,27 +1,59 @@
-[
-  {
-    "id": "biological-constraints-analysis",
-    "name": "Biological Constraints Analysis",
-    "description": "Conduct desktop review and field reconnaissance to identify biological resources and potential constraints relevant to project feasibility and permitting."
-  },
-  {
-    "id": "habitat-assessment",
-    "name": "Habitat Assessment",
-    "description": "Characterize on-site and adjacent habitat conditions, identify sensitive communities, and evaluate habitat suitability for special-status species."
-  },
-  {
-    "id": "focused-burrowing-owl-survey",
-    "name": "Focused Burrowing Owl Survey",
-    "description": "Perform protocol-level focused surveys for burrowing owl, document sign and occupancy potential, and provide avoidance and minimization recommendations."
-  },
-  {
-    "id": "focused-botanical-survey",
-    "name": "Focused Botanical Survey",
-    "description": "Complete floristic surveys during the appropriate blooming window to assess the potential presence of special-status plant species."
-  },
-  {
-    "id": "jurisdictional-delineation",
-    "name": "Jurisdictional Delineation",
-    "description": "Delineate aquatic resources and potential jurisdictional features, map limits, and summarize anticipated permitting pathways."
-  }
-]
+{
+  "disciplines": [
+    {
+      "id": "biology",
+      "name": "Biology",
+      "filenamePrefix": "BioScope",
+      "status": "active",
+      "scopeTitle": "BIOLOGICAL CONSULTING SCOPE OF WORK",
+      "taskCategory": "Biology Tasks",
+      "tasks": [
+        {
+          "id": "biological-constraints-analysis",
+          "name": "Biological Constraints Analysis",
+          "description": "Conduct desktop review and field reconnaissance to identify biological resources and potential constraints relevant to project feasibility and permitting."
+        },
+        {
+          "id": "habitat-assessment",
+          "name": "Habitat Assessment",
+          "description": "Characterize on-site and adjacent habitat conditions, identify sensitive communities, and evaluate habitat suitability for special-status species."
+        },
+        {
+          "id": "focused-burrowing-owl-survey",
+          "name": "Focused Burrowing Owl Survey",
+          "description": "Perform protocol-level focused surveys for burrowing owl, document sign and occupancy potential, and provide avoidance and minimization recommendations."
+        },
+        {
+          "id": "focused-botanical-survey",
+          "name": "Focused Botanical Survey",
+          "description": "Complete floristic surveys during the appropriate blooming window to assess the potential presence of special-status plant species."
+        },
+        {
+          "id": "jurisdictional-delineation",
+          "name": "Jurisdictional Delineation",
+          "description": "Delineate aquatic resources and potential jurisdictional features, map limits, and summarize anticipated permitting pathways."
+        }
+      ]
+    },
+    {
+      "id": "ceqa",
+      "name": "CEQA",
+      "filenamePrefix": "CEQAScope",
+      "status": "placeholder",
+      "scopeTitle": "CEQA CONSULTING SCOPE OF WORK",
+      "taskCategory": "CEQA Tasks",
+      "placeholderMessage": "CEQA task workflows are reserved for a future release. Discipline structure is present for expansion.",
+      "tasks": []
+    },
+    {
+      "id": "cultural",
+      "name": "Cultural",
+      "filenamePrefix": "CulturalScope",
+      "status": "placeholder",
+      "scopeTitle": "CULTURAL RESOURCES CONSULTING SCOPE OF WORK",
+      "taskCategory": "Cultural Tasks",
+      "placeholderMessage": "Cultural task workflows are reserved for a future release. Discipline structure is present for expansion.",
+      "tasks": []
+    }
+  ]
+}
