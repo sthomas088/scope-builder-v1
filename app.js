@@ -5,8 +5,9 @@ const state = {
   previousEditorContent: '',
 };
 
-const DEFAULT_EDITOR_TEXT =
-  'Select tasks and review the live preview. Then click "Send Preview → Editor".';
+function createDefaultEditorHtml() {
+  return `<p class="document-placeholder">Select tasks and review the live preview. Then click "Send to Editor".</p>`;
+}
 
 const els = {
   discipline: document.getElementById('discipline'),
@@ -60,9 +61,15 @@ function sanitizeForFilename(input) {
   return input.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
 }
 
+function getEditorHtml() {
+  return els.scopeEditor.innerHTML.trim();
+}
+
 function editorHasExportableContent() {
-  const value = els.scopeEditor.value.trim();
-  return value && value !== DEFAULT_EDITOR_TEXT;
+  const html = getEditorHtml();
+  if (!html) return false;
+  const text = els.scopeEditor.innerText.trim();
+  return !!text;
 }
 
 function getCountyValue() {
@@ -365,13 +372,41 @@ function buildAttachmentAText(project, selectedTasks) {
   return `${header}\n\n${taskSection}${deliverablesSection}`;
 }
 
+function buildSignatureBlockHtml(project) {
+  return `
+    <div class="document-signature-grid">
+      <div class="document-signature-block">
+        <div class="document-signature-line"></div>
+        <div class="document-signature-name">${escapeHtml(project.signatories[0]?.name || '')}</div>
+        <div class="document-signature-title">${escapeHtml(project.signatories[0]?.title || '')}</div>
+      </div>
+      <div class="document-signature-block">
+        <div class="document-signature-line"></div>
+        <div class="document-signature-name">${escapeHtml(project.signatories[1]?.name || '')}</div>
+        <div class="document-signature-title">${escapeHtml(project.signatories[1]?.title || '')}</div>
+      </div>
+    </div>
+  `;
+}
+
 function buildFullDocumentText(project, selectedTasks) {
   const coverLetterText = buildCoverLetterText(project);
   const attachmentText = buildAttachmentAText(project, selectedTasks);
 
   if (!coverLetterText) return attachmentText;
 
-  return `${coverLetterText}\n\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n\n${attachmentText}`;
+  const signatureText = [
+    '\n\n',
+    '____________________________________',
+    project.signatories[0]?.name || '',
+    project.signatories[0]?.title || '',
+    '\n\n',
+    '____________________________________',
+    project.signatories[1]?.name || '',
+    project.signatories[1]?.title || '',
+  ].join('\n');
+
+  return `${coverLetterText}${signatureText}\n\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n\n${attachmentText}`;
 }
 
 function buildPreviewDocumentHtml(project, selectedTasks) {
@@ -418,6 +453,7 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
   const coverSection = `
     <div class="document-section">
       ${coverLetterParagraphs}
+      ${project.coverLetterType === 'none' ? '' : buildSignatureBlockHtml(project)}
     </div>
   `;
 
@@ -443,6 +479,15 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
   `;
 }
 
+function updateDocumentActionsVisibility() {
+  const inPreview = state.currentDocumentMode === 'preview';
+  els.sendPreviewToEditorBtn.classList.toggle('hidden', !inPreview);
+  els.restorePreviousEditorBtn.classList.toggle(
+    'hidden',
+    inPreview || !state.previousEditorContent
+  );
+}
+
 function setDocumentMode(mode) {
   state.currentDocumentMode = mode;
 
@@ -459,6 +504,8 @@ function setDocumentMode(mode) {
   els.documentModeMessage.textContent = previewActive
     ? 'Live preview — updates automatically.'
     : 'Editing mode — changes are not auto-synced.';
+
+  updateDocumentActionsVisibility();
 }
 
 function refreshPreviewDocument() {
@@ -474,30 +521,27 @@ function sendPreviewToEditor() {
   const discipline = getSelectedDiscipline();
   const project = getProjectInfo();
   const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
-  const newEditorText = buildFullDocumentText(project, selectedTasks);
+  const newEditorHtml = buildPreviewDocumentHtml(project, selectedTasks);
 
-  if (els.scopeEditor.value.trim() && els.scopeEditor.value.trim() !== DEFAULT_EDITOR_TEXT) {
+  if (editorHasExportableContent()) {
     const confirmed = window.confirm(
       'This will replace your current editor content with the latest preview. Continue?'
     );
     if (!confirmed) return;
   }
 
-  state.previousEditorContent = els.scopeEditor.value;
-  els.scopeEditor.value = newEditorText;
-  els.restorePreviousEditorBtn.classList.remove('hidden');
+  state.previousEditorContent = els.scopeEditor.innerHTML;
+  els.scopeEditor.innerHTML = newEditorHtml;
   els.exportBtn.disabled = false;
   setDocumentMode('editor');
 }
 
 function restorePreviousEditorVersion() {
-  const currentContent = els.scopeEditor.value;
-  els.scopeEditor.value = state.previousEditorContent;
+  const currentContent = els.scopeEditor.innerHTML;
+  els.scopeEditor.innerHTML = state.previousEditorContent || createDefaultEditorHtml();
   state.previousEditorContent = currentContent;
-
-  if (!editorHasExportableContent()) {
-    els.exportBtn.disabled = true;
-  }
+  els.exportBtn.disabled = !editorHasExportableContent();
+  updateDocumentActionsVisibility();
 }
 
 function validateForExport() {
@@ -520,6 +564,36 @@ function buildFileName(projectName, discipline, date) {
   return `${cleanProjectName}_${discipline.filenamePrefix}_${date}.docx`;
 }
 
+function convertHtmlToPlainText(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+
+  temp.querySelectorAll('.document-page-break').forEach((el) => {
+    const replacement = document.createTextNode(
+      '\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n'
+    );
+    el.replaceWith(replacement);
+  });
+
+  temp.querySelectorAll('.document-signature-grid').forEach((grid) => {
+    const blocks = Array.from(grid.querySelectorAll('.document-signature-block'));
+    const lines = [];
+
+    blocks.forEach((block, index) => {
+      const name = block.querySelector('.document-signature-name')?.innerText?.trim() || '';
+      const title = block.querySelector('.document-signature-title')?.innerText?.trim() || '';
+      lines.push('____________________________________');
+      if (name) lines.push(name);
+      if (title) lines.push(title);
+      if (index < blocks.length - 1) lines.push('');
+    });
+
+    grid.replaceWith(document.createTextNode(`\n${lines.join('\n')}\n`));
+  });
+
+  return temp.innerText.replace(/\n{3,}/g, '\n\n').trim();
+}
+
 function buildDocParagraphsFromText(text) {
   const { Paragraph } = window.docx;
   const lines = text.split('\n');
@@ -539,9 +613,10 @@ async function exportToWord() {
 
   const discipline = getSelectedDiscipline();
   const { Document, Packer } = window.docx;
+  const plainText = convertHtmlToPlainText(els.scopeEditor.innerHTML);
 
   const doc = new Document({
-    sections: [{ properties: {}, children: buildDocParagraphsFromText(els.scopeEditor.value) }],
+    sections: [{ properties: {}, children: buildDocParagraphsFromText(plainText) }],
   });
 
   const blob = await Packer.toBlob(doc);
@@ -589,7 +664,7 @@ function registerLivePreviewListeners() {
 
 function init() {
   els.scopeDate.value = todayIsoDate();
-  els.scopeEditor.value = DEFAULT_EDITOR_TEXT;
+  els.scopeEditor.innerHTML = createDefaultEditorHtml();
 
   updateCountyInputVisibility();
   updateRegionalFrameworkVisibility();
@@ -597,6 +672,7 @@ function init() {
   setDocumentMode('preview');
 
   els.discipline.addEventListener('change', renderTaskSection);
+
   els.projectCounty.addEventListener('change', () => {
     updateCountyInputVisibility();
     refreshPreviewDocument();
@@ -637,7 +713,7 @@ function init() {
     .catch((error) => {
       console.error(error);
       els.previewDocument.innerHTML = '<p class="document-placeholder">Error loading task library.</p>';
-      els.scopeEditor.value = 'Error loading task library.';
+      els.scopeEditor.innerHTML = '<p class="document-placeholder">Error loading task library.</p>';
       els.exportBtn.disabled = true;
     });
 }
