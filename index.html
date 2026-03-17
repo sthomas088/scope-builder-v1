@@ -171,32 +171,59 @@
           </section>
 
           <div class="actions">
-            <button id="generateBtn" type="button">Generate Scope</button>
+            <button id="generateBtn" type="button">Refresh Preview</button>
             <button id="exportBtn" type="button" disabled>Export to Word</button>
           </div>
         </div>
 
-        <section class="right-panel card" aria-labelledby="editor-heading">
-          <h2 id="editor-heading">Preview / Editor</h2>
+        <section class="right-panel card" aria-labelledby="document-heading">
+          <div class="document-toolbar">
+            <div class="mode-toggle" role="tablist" aria-label="Document mode">
+              <button
+                id="previewModeBtn"
+                class="mode-tab active"
+                type="button"
+                role="tab"
+                aria-selected="true"
+              >
+                Preview
+              </button>
+              <button
+                id="editorModeBtn"
+                class="mode-tab"
+                type="button"
+                role="tab"
+                aria-selected="false"
+              >
+                Editor
+              </button>
+            </div>
 
-          <div class="preview-tabs" role="tablist" aria-label="Preview tabs">
-            <button id="coverLetterTab" class="preview-tab active" type="button" role="tab" aria-selected="true">Cover Letter</button>
-            <button id="attachmentTab" class="preview-tab" type="button" role="tab" aria-selected="false">Attachment A</button>
+            <div class="document-actions">
+              <button id="sendPreviewToEditorBtn" type="button">Send Preview → Editor</button>
+              <button id="restorePreviousEditorBtn" type="button" class="secondary-button hidden">
+                Restore Previous Version
+              </button>
+            </div>
           </div>
 
-          <p id="coverLetterDisabledMessage" class="disabled-message hidden">Cover letter disabled</p>
+          <p id="documentModeMessage" class="document-mode-message">
+            Live preview — updates automatically.
+          </p>
 
-          <div id="coverLetterPanel" class="tab-panel active" role="tabpanel">
-            <textarea id="coverLetterEditor" class="scope-editor" spellcheck="true" aria-label="Cover letter editor"></textarea>
+          <div id="previewDocumentPanel" class="document-panel active" role="tabpanel" aria-labelledby="previewModeBtn">
+            <div id="previewDocument" class="document-view">
+              <p class="document-placeholder">Complete project information and select tasks to begin building the document.</p>
+            </div>
           </div>
 
-          <div id="attachmentPanel" class="tab-panel" role="tabpanel">
+          <div id="editorDocumentPanel" class="document-panel" role="tabpanel" aria-labelledby="editorModeBtn">
             <textarea
               id="scopeEditor"
               class="scope-editor"
               spellcheck="true"
-              aria-label="Attachment A editor"
-            >Select a discipline, complete project information, and click "Generate Scope".</textarea>
+              aria-label="Document editor"
+            >Select tasks and review the live preview. Then click "Send Preview → Editor".</textarea>
           </div>
         </section>
       </section>
