@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scope Builder V1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <h1>Scope Builder V1</h1>
+        <p class="subtitle">Consulting scope of work generator</p>
+      </header>
+
+      <section class="top-controls" aria-label="Global controls">
+        <div class="control-block discipline-control" aria-label="Discipline selector">
+          <label for="discipline">Discipline</label>
+          <select id="discipline" required>
+            <option value="">Select discipline</option>
+            <option value="biology" selected>Biology</option>
+            <option value="ceqa">CEQA</option>
+            <option value="cultural">Cultural</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Scope builder workspace">
+        <div class="left-panel" aria-label="Configuration panel">
+          <section class="card" aria-labelledby="cover-letter-toggle-heading">
+            <h2 id="cover-letter-toggle-heading">Cover Letter</h2>
+            <label>
+              Cover Letter
+              <select id="coverLetterType">
+                <option value="none">None</option>
+                <option value="simple" selected>Simple</option>
+                <option value="standard">Standard</option>
+                <option value="expanded">Expanded</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="card" aria-labelledby="client-cover-heading">
+            <h2 id="client-cover-heading">Client / Cover Letter Information</h2>
+            <div class="grid">
+              <label>
+                Client
+                <input type="text" id="client" required />
+              </label>
+              <label>
+                Contact Name
+                <input type="text" id="contactName" />
+              </label>
+              <label>
+                Contact Email
+                <input type="email" id="contactEmail" />
+              </label>
+              <label>
+                Client Address
+                <input type="text" id="clientAddress" />
+              </label>
+              <label class="full-width">
+                Subject Line
+                <input type="text" id="subjectLine" />
+              </label>
+              <label>
+                Date
+                <input type="date" id="scopeDate" required />
+              </label>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="project-info-heading">
+            <h2 id="project-info-heading">Project Information</h2>
+            <div class="grid">
+              <label>
+                Project Name
+                <input type="text" id="projectName" required />
+              </label>
+              <label>
+                Project Address
+                <input type="text" id="projectAddress" />
+              </label>
+              <label>
+                Project City
+                <input type="text" id="projectCity" required />
+              </label>
+              <label>
+                Project County
+                <select id="projectCounty" required>
+                  <option value="">Select county</option>
+                  <option value="Los Angeles">Los Angeles</option>
+                  <option value="Orange">Orange</option>
+                  <option value="San Diego">San Diego</option>
+                  <option value="Riverside">Riverside</option>
+                  <option value="San Bernardino">San Bernardino</option>
+                  <option value="Ventura">Ventura</option>
+                  <option value="Santa Barbara">Santa Barbara</option>
+                  <option value="Imperial">Imperial</option>
+                  <option value="Kern">Kern</option>
+                  <option value="Custom">Custom</option>
+                </select>
+              </label>
+              <label id="customProjectCountyWrap" class="hidden">
+                Custom County Name
+                <input type="text" id="customProjectCounty" />
+              </label>
+              <label>
+                Project State
+                <input type="text" id="projectState" value="CA" required />
+              </label>
+              <label id="regionalFrameworkWrap">
+                Regional Framework / Area Plan
+                <select id="regionalFramework">
+                  <option value="None" selected>None</option>
+                  <option value="Western Riverside County MSHCP">Western Riverside County MSHCP</option>
+                  <option value="Santa Monica Mountains North Area Plan">Santa Monica Mountains North Area Plan</option>
+                  <option value="San Diego MSCP">San Diego MSCP</option>
+                  <option value="San Diego MHPA">San Diego MHPA</option>
+                  <option value="Coachella Valley MSHCP">Coachella Valley MSHCP</option>
+                  <option value="Desert Renewable Energy Conservation Plan (DRECP)">Desert Renewable Energy Conservation Plan (DRECP)</option>
+                  <option value="Kern County Valley Floor HCP">Kern County Valley Floor HCP</option>
+                  <option value="Custom">Custom</option>
+                </select>
+              </label>
+              <label id="customRegionalFrameworkWrap" class="hidden">
+                Custom Regional Framework / Area Plan
+                <input type="text" id="customRegionalFramework" />
+              </label>
+              <label id="acreageWrap" class="hidden">
+                Acreage
+                <input type="text" id="acreage" />
+              </label>
+              <label id="apnWrap" class="hidden">
+                APN
+                <input type="text" id="apn" />
+              </label>
+              <label id="generalProjectUnderstandingWrap" class="hidden full-width">
+                General Project Understanding
+                <textarea id="generalProjectUnderstanding" rows="4"></textarea>
+              </label>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="signatories-heading">
+            <h2 id="signatories-heading">Signatories</h2>
+            <div class="grid">
+              <label>
+                Name
+                <input type="text" id="signatory1Name" />
+              </label>
+              <label>
+                Title
+                <input type="text" id="signatory1Title" />
+              </label>
+              <label>
+                Name
+                <input type="text" id="signatory2Name" />
+              </label>
+              <label>
+                Title
+                <input type="text" id="signatory2Title" />
+              </label>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading">Discipline Tasks</h2>
+            <p id="taskCategoryLabel" class="task-category-label">Select a discipline to load tasks.</p>
+            <div id="taskList" class="task-list" role="group" aria-label="Task options"></div>
+          </section>
+
+          <div class="actions">
+            <button id="generateBtn" type="button">Generate Scope</button>
+            <button id="exportBtn" type="button" disabled>Export to Word</button>
+          </div>
+        </div>
+
+        <section class="right-panel card" aria-labelledby="editor-heading">
+          <h2 id="editor-heading">Preview / Editor</h2>
+
+          <div class="preview-tabs" role="tablist" aria-label="Preview tabs">
+            <button id="coverLetterTab" class="preview-tab active" type="button" role="tab" aria-selected="true">Cover Letter</button>
+            <button id="attachmentTab" class="preview-tab" type="button" role="tab" aria-selected="false">Attachment A</button>
+          </div>
+
+          <p id="coverLetterDisabledMessage" class="disabled-message hidden">Cover letter disabled</p>
+
+          <div id="coverLetterPanel" class="tab-panel active" role="tabpanel">
+            <textarea id="coverLetterEditor" class="scope-editor" spellcheck="true" aria-label="Cover letter editor"></textarea>
+          </div>
+
+          <div id="attachmentPanel" class="tab-panel" role="tabpanel">
+            <textarea
+              id="scopeEditor"
+              class="scope-editor"
+              spellcheck="true"
+              aria-label="Attachment A editor"
+            >Select a discipline, complete project information, and click "Generate Scope".</textarea>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
