@@ -222,50 +222,155 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.preview-tabs {
+.document-toolbar {
   display: flex;
-  gap: 0.3rem;
-  margin-bottom: 0.35rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
 }
 
-.preview-tab {
+.mode-toggle {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.mode-tab {
   background: #e2e8f0;
   color: #0f172a;
   border: 1px solid #cbd5e1;
-  padding: 0.28rem 0.48rem;
-  font-size: 0.78rem;
+  border-radius: 7px;
+  padding: 0.36rem 0.58rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.preview-tab.active {
+.mode-tab.active {
   background: #2563eb;
   color: #fff;
   border-color: #2563eb;
 }
 
-.preview-tab:disabled {
-  background: #e2e8f0;
-  color: #64748b;
-  border-color: #cbd5e1;
-  cursor: not-allowed;
+.document-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
-.tab-panel {
+.secondary-button {
+  background: #e2e8f0;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.document-mode-message {
+  margin: 0 0 0.4rem;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.document-panel {
   display: none;
   flex: 1;
   min-height: 0;
 }
 
-.tab-panel.active {
+.document-panel.active {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-.disabled-message {
-  margin: 0 0 0.3rem;
+.document-view {
+  width: 100%;
+  flex: 1;
+  min-height: 520px;
+  overflow: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  padding: 0.85rem;
+  line-height: 1.45;
+}
+
+.document-placeholder {
+  margin: 0;
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.document-section-title {
+  margin: 0 0 0.7rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+.document-paragraph {
+  margin: 0 0 0.75rem;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
+
+.document-page-break {
+  margin: 1.1rem 0 1rem;
+  border-top: 2px dashed #cbd5e1;
+  position: relative;
+}
+
+.document-page-break-label {
+  display: inline-block;
+  position: relative;
+  top: -0.68rem;
+  background: #fff;
+  padding: 0 0.45rem;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.document-task {
+  margin-bottom: 0.95rem;
+}
+
+.document-task-title {
+  margin: 0 0 0.26rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.document-task-text {
+  margin: 0;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
+
+.document-deliverables {
+  margin-top: 1rem;
+}
+
+.document-deliverables-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.document-deliverables-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #1e293b;
+}
+
+.document-total {
+  margin-top: 1.1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #dbe2ea;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .scope-editor {
@@ -282,7 +387,7 @@ button:disabled {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 @media (max-width: 980px) {
@@ -306,6 +411,7 @@ button:disabled {
     min-height: auto;
   }
 
+  .document-view,
   .scope-editor {
     min-height: 460px;
   }
