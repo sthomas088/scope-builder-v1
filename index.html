@@ -198,13 +198,13 @@
                 Editor
               </button>
             </div>
+          </div>
 
-            <div class="document-actions">
-              <button id="sendPreviewToEditorBtn" type="button">Send Preview → Editor</button>
-              <button id="restorePreviousEditorBtn" type="button" class="secondary-button hidden">
-                Restore Previous Version
-              </button>
-            </div>
+          <div class="document-actions-row">
+            <button id="sendPreviewToEditorBtn" type="button">Send to Editor</button>
+            <button id="restorePreviousEditorBtn" type="button" class="secondary-button hidden">
+              Restore Previous Version
+            </button>
           </div>
 
           <p id="documentModeMessage" class="document-mode-message">
@@ -218,12 +218,13 @@
           </div>
 
           <div id="editorDocumentPanel" class="document-panel" role="tabpanel" aria-labelledby="editorModeBtn">
-            <textarea
+            <div
               id="scopeEditor"
-              class="scope-editor"
+              class="document-view document-editor"
+              contenteditable="true"
               spellcheck="true"
               aria-label="Document editor"
-            >Select tasks and review the live preview. Then click "Send Preview → Editor".</textarea>
+            ></div>
           </div>
         </section>
       </section>
