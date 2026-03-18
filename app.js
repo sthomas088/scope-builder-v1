@@ -634,9 +634,9 @@ async function exportToWord() {
 
   const pageMarginTwips = convertInchesToTwip(1.0);
   const coverRightTab = convertInchesToTwip(6.5);
-  const signatureRightTab = convertInchesToTwip(5.9);
+  const signatureRightTab = convertInchesToTwip(3.5);
   const subjectTab = convertInchesToTwip(1.0);
-  const taskTitleTab = convertInchesToTwip(1.4);
+  const taskTitleTab = convertInchesToTwip(1.0);
   const taskAmountTab = convertInchesToTwip(6.5);
   const footerCenterTab = convertInchesToTwip(3.25);
   const footerRightTab = convertInchesToTwip(6.5);
@@ -692,7 +692,7 @@ async function exportToWord() {
     });
   }
 
-  function makeBlankParagraph(after = 120) {
+  function makeBlankParagraph(after = 0) {
     return new Paragraph({
       children: [makeRun('')],
       spacing: { after },
@@ -730,11 +730,20 @@ async function exportToWord() {
     const subjectText = project.subjectLine || project.projectName || 'Scope of Work';
     const greetingName = project.contactName || 'Client';
 
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+
     children.push(
       makeParagraph(formatDisplayDate(project.date), {
-        spacing: { after: 220 },
+        spacing: { after: 0 },
       })
     );
+
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
 
     children.push(
       new Paragraph({
@@ -757,7 +766,7 @@ async function exportToWord() {
         children: [
           makeRun(project.contactName || ''),
           makeRun('\t'),
-          makeRun(project.contactEmail || ''),
+          makeRun(project.contactEmail || '', { bold: true }),
         ],
       })
     );
@@ -766,7 +775,7 @@ async function exportToWord() {
       pushLinesAsParagraphs(children, project.clientAddress, { after: 0 });
     }
 
-    children.push(makeBlankParagraph(140));
+    children.push(makeBlankParagraph());
 
     children.push(
       new Paragraph({
@@ -774,7 +783,7 @@ async function exportToWord() {
         spacing: { after: 220 },
         keepLines: true,
         children: [
-          makeRun('Subject:', { bold: true }),
+          makeRun('Subject:', { bold: false }),
           makeRun('\t'),
           makeRun(subjectText),
         ],
@@ -798,9 +807,14 @@ async function exportToWord() {
 
     children.push(
       makeParagraph('Sincerely,', {
-        spacing: { after: 260 },
+        spacing: { after: 0 },
       })
     );
+
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
 
     if (secondarySignatory && (secondarySignatory.name || secondarySignatory.title)) {
       children.push(
@@ -819,7 +833,7 @@ async function exportToWord() {
       children.push(
         new Paragraph({
           tabStops: [{ type: TabStopType.RIGHT, position: signatureRightTab }],
-          spacing: { after: 220 },
+          spacing: { after: 0 },
           keepLines: true,
           children: [
             makeRun(primarySignatory.title || ''),
@@ -840,12 +854,15 @@ async function exportToWord() {
       if (primarySignatory.title) {
         children.push(
           makeParagraph(primarySignatory.title, {
-            spacing: { after: 220 },
+            spacing: { after: 0 },
             keepLines: true,
           })
         );
       }
     }
+
+    children.push(makeBlankParagraph());
+    children.push(makeBlankParagraph());
 
     children.push(
       makeParagraph('Attachment A – Scope of Work and Fee Estimate', {
@@ -981,29 +998,53 @@ async function exportToWord() {
   function buildAttachmentChildren() {
     const children = [];
 
-    buildAttachmentTitleLines(project).forEach((line) => {
-      children.push(
-        makeParagraph(line, {
-          alignment: AlignmentType.CENTER,
-          bold: true,
-          spacing: { after: 15 },
-          keepLines: true,
-          keepNext: true,
-        })
-      );
-    });
+    children.push(makeBlankParagraph());
 
-    children.push(makeBlankParagraph(0));
+    children.push(
+      makeParagraph('ATTACHMENT A', {
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        spacing: { after: 0 },
+        keepLines: true,
+        keepNext: true,
+      })
+    );
+
+    children.push(makeBlankParagraph());
+
+    children.push(
+      makeParagraph('SCOPE OF WORK AND FEE ESTIMATE', {
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        spacing: { after: 0 },
+        keepLines: true,
+        keepNext: true,
+      })
+    );
+
+    children.push(
+      makeParagraph((project.projectName || 'PROJECT SITE').toUpperCase(), {
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        spacing: { after: 0 },
+        keepLines: true,
+        keepNext: true,
+      })
+    );
+
+    children.push(makeBlankParagraph());
 
     children.push(
       makeParagraph(formatDisplayDate(project.date), {
         alignment: AlignmentType.CENTER,
         bold: true,
-        spacing: { after: 220 },
+        spacing: { after: 0 },
         keepLines: true,
         keepNext: true,
       })
     );
+
+    children.push(makeBlankParagraph());
 
     const baseTasks = selectedTasks.filter((task) => !isOptionalTask(task));
     const optionalTasks = selectedTasks.filter((task) => isOptionalTask(task));
