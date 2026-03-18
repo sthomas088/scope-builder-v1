@@ -303,6 +303,7 @@ function buildCoverLetterText(project) {
 
   if (project.client) lines.push(project.client);
   if (project.contactName) lines.push(project.contactName);
+  if (project.contactEmail) lines.push(project.contactEmail);
   if (project.clientAddress) lines.push(project.clientAddress);
 
   const subjectText = project.subjectLine || project.projectName || 'Scope of Work';
@@ -421,9 +422,10 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
   const attachmentTasksHtml = selectedTasks.length
     ? selectedTasks
         .map((task, index) => {
+          const feeDisplay = task.fee ? escapeHtml(String(task.fee)) : '$—';
           return `
             <div class="document-task">
-              <div class="document-task-title">${escapeHtml(`${index + 1}. ${task.name}`)}</div>
+              <div class="document-task-title">${escapeHtml(`TASK ${index + 1}`)}&nbsp;&nbsp;&nbsp;&nbsp;${escapeHtml(task.name || '')}<span style="float:right;">${feeDisplay}</span></div>
               <p class="document-task-text">${escapeHtml(task.description || '')}</p>
             </div>
           `;
@@ -459,8 +461,8 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
 
   const attachmentSection = `
     <div class="document-section">
-      <div class="document-section-title">ATTACHMENT A – SCOPE OF WORK</div>
-      ${project.projectName ? `<p class="document-paragraph">${escapeHtml(project.projectName)}</p>` : ''}
+      <div class="document-section-title">ATTACHMENT A – SCOPE OF WORK AND FEE ESTIMATE</div>
+      ${project.projectName ? `<p class="document-paragraph"><strong>${escapeHtml(project.projectName)}</strong></p>` : ''}
       ${attachmentTasksHtml}
       ${deliverablesHtml}
     </div>
@@ -715,20 +717,18 @@ async function exportToWord() {
     convertInchesToTwip,
   } = window.docx;
 
-  const PAGE_WIDTH = 8.5;
-  const LEFT_RIGHT_MARGIN = 1.0;
-  const BODY_WIDTH = PAGE_WIDTH - (LEFT_RIGHT_MARGIN * 2);
-
-  const rightTab = convertInchesToTwip(PAGE_WIDTH - LEFT_RIGHT_MARGIN);
-  const centerTab = convertInchesToTwip(PAGE_WIDTH / 2);
-  const subjectTab = convertInchesToTwip(1.1);
-  const amountTab = convertInchesToTwip(PAGE_WIDTH - LEFT_RIGHT_MARGIN);
   const pageMarginTwips = convertInchesToTwip(1.0);
+
+  const coverRightTab = convertInchesToTwip(5.8);
+  const attachmentAmountTab = convertInchesToTwip(6.5);
+  const footerCenterTab = convertInchesToTwip(3.25);
+  const footerRightTab = convertInchesToTwip(6.5);
+  const subjectTab = convertInchesToTwip(1.0);
 
   function makeRun(text = '', options = {}) {
     return new TextRun({
       text,
-      font: 'Times New Roman',
+      font: 'Arial',
       size: 22,
       ...options,
     });
@@ -746,7 +746,6 @@ async function exportToWord() {
       keepLines,
       keepNext,
       children,
-      style,
       pageBreakBefore,
     } = options;
 
@@ -760,7 +759,6 @@ async function exportToWord() {
         border,
         keepLines,
         keepNext,
-        style,
         pageBreakBefore,
       });
     }
@@ -774,7 +772,6 @@ async function exportToWord() {
       border,
       keepLines,
       keepNext,
-      style,
       pageBreakBefore,
     });
   }
@@ -823,35 +820,31 @@ async function exportToWord() {
       })
     );
 
-    if (project.client || project.contactName || project.contactEmail) {
-      children.push(
-        new Paragraph({
-          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
-          spacing: { after: 0 },
-          keepLines: true,
-          children: [
-            makeRun(project.client || ''),
-            makeRun('\t'),
-            makeRun('VIA EMAIL', { bold: true }),
-          ],
-        })
-      );
+    children.push(
+      new Paragraph({
+        tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
+        spacing: { after: 0 },
+        keepLines: true,
+        children: [
+          makeRun(project.client || ''),
+          makeRun('\t'),
+          makeRun('VIA EMAIL', { bold: true }),
+        ],
+      })
+    );
 
-      if (project.contactName || project.contactEmail) {
-        children.push(
-          new Paragraph({
-            tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
-            spacing: { after: 0 },
-            keepLines: true,
-            children: [
-              makeRun(project.contactName || ''),
-              makeRun('\t'),
-              makeRun(project.contactEmail || ''),
-            ],
-          })
-        );
-      }
-    }
+    children.push(
+      new Paragraph({
+        tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
+        spacing: { after: 0 },
+        keepLines: true,
+        children: [
+          makeRun(project.contactName || ''),
+          makeRun('\t'),
+          makeRun(project.contactEmail || ''),
+        ],
+      })
+    );
 
     if (project.clientAddress) {
       pushLinesAsParagraphs(children, project.clientAddress, { after: 0 });
@@ -889,14 +882,14 @@ async function exportToWord() {
 
     children.push(
       makeParagraph('Sincerely,', {
-        spacing: { after: 360 },
+        spacing: { after: 280 },
       })
     );
 
     if (secondarySignatory && (secondarySignatory.name || secondarySignatory.title)) {
       children.push(
         new Paragraph({
-          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
           spacing: { after: 0 },
           keepLines: true,
           children: [
@@ -909,7 +902,7 @@ async function exportToWord() {
 
       children.push(
         new Paragraph({
-          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
           spacing: { after: 220 },
           keepLines: true,
           children: [
@@ -980,8 +973,8 @@ async function exportToWord() {
             },
           },
           tabStops: [
-            { type: TabStopType.CENTER, position: centerTab },
-            { type: TabStopType.RIGHT, position: rightTab },
+            { type: TabStopType.CENTER, position: footerCenterTab },
+            { type: TabStopType.RIGHT, position: footerRightTab },
           ],
           spacing: { before: 120, after: 0 },
           children: [
@@ -997,27 +990,32 @@ async function exportToWord() {
   }
 
   function buildTaskHeadingParagraph(taskNumber, taskName, feeText, optional = false) {
-    const label = optional
-      ? `OPTIONAL TASK ${taskNumber} – ${String(taskName || '').toUpperCase()}`
-      : `TASK ${taskNumber} – ${String(taskName || '').toUpperCase()}`;
+    const labelPrefix = optional ? `OPTIONAL TASK ${taskNumber}` : `TASK ${taskNumber}`;
+    const displayFee = feeText && String(feeText).trim() ? String(feeText).trim() : '$—';
 
     return new Paragraph({
-      tabStops: [{ type: TabStopType.RIGHT, position: amountTab }],
-      spacing: { after: 120 },
+      tabStops: [
+        { type: TabStopType.LEFT, position: convertInchesToTwip(1.35) },
+        { type: TabStopType.RIGHT, position: attachmentAmountTab },
+      ],
+      spacing: { after: 100 },
       keepLines: true,
       keepNext: true,
       children: [
-        makeRun(label, { bold: true }),
+        makeRun(labelPrefix, { bold: true }),
         makeRun('\t'),
-        makeRun(feeText || '', { bold: true }),
+        makeRun(String(taskName || '').toUpperCase(), { bold: true }),
+        makeRun('\t'),
+        makeRun(displayFee, { bold: true }),
       ],
     });
   }
 
   function buildTaskDescriptionParagraphs(text) {
     return splitTextIntoParagraphs(text).map((paragraphText, index, arr) =>
-      makeJustifiedParagraph(paragraphText, index === arr.length - 1 ? 150 : 120, {
+      makeJustifiedParagraph(paragraphText, index === arr.length - 1 ? 140 : 110, {
         keepLines: true,
+        indent: { left: convertInchesToTwip(0.28) },
       })
     );
   }
@@ -1033,8 +1031,9 @@ async function exportToWord() {
 
     return new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 180, line: 276 },
+      spacing: { after: 160, line: 276 },
       keepLines: true,
+      indent: { left: convertInchesToTwip(0.28) },
       children: [
         makeRun('Deliverables: ', { italics: true }),
         makeRun(content, { italics: true }),
@@ -1044,8 +1043,8 @@ async function exportToWord() {
 
   function buildTotalsParagraph(label, totalText) {
     return new Paragraph({
-      tabStops: [{ type: TabStopType.RIGHT, position: amountTab }],
-      spacing: { before: 60, after: 120 },
+      tabStops: [{ type: TabStopType.RIGHT, position: attachmentAmountTab }],
+      spacing: { before: 80, after: 110 },
       keepLines: true,
       children: [
         makeRun(label, { bold: true, italics: true }),
@@ -1061,9 +1060,9 @@ async function exportToWord() {
     buildAttachmentTitleLines(project).forEach((line, index) => {
       children.push(
         makeParagraph(line, {
-          alignment: AlignmentType.CENTER,
+          alignment: AlignmentType.LEFT,
           bold: true,
-          spacing: { after: index === 0 ? 20 : index === 1 ? 20 : 0 },
+          spacing: { after: index === 2 ? 0 : 10 },
           keepLines: true,
           keepNext: true,
         })
@@ -1072,7 +1071,7 @@ async function exportToWord() {
 
     children.push(
       makeParagraph(formatDisplayDate(project.date), {
-        alignment: AlignmentType.CENTER,
+        alignment: AlignmentType.LEFT,
         bold: true,
         spacing: { after: 220 },
         keepLines: true,
@@ -1095,7 +1094,8 @@ async function exportToWord() {
 
     orderedTasks.forEach((task, index) => {
       const optional = isOptionalTask(task);
-      const feeText = task.fee ? String(task.fee) : '';
+      const feeText = task.fee ? String(task.fee) : '$—';
+
       children.push(
         buildTaskHeadingParagraph(index + 1, task.name, feeText, optional)
       );
@@ -1104,7 +1104,12 @@ async function exportToWord() {
       if (taskParagraphs.length) {
         children.push(...taskParagraphs);
       } else {
-        children.push(makeParagraph('', { spacing: { after: 120 } }));
+        children.push(
+          makeParagraph('', {
+            spacing: { after: 120 },
+            indent: { left: convertInchesToTwip(0.28) },
+          })
+        );
       }
 
       const deliverablesParagraph = buildDeliverablesParagraph(task.deliverables);
@@ -1144,7 +1149,7 @@ async function exportToWord() {
       default: {
         document: {
           run: {
-            font: 'Times New Roman',
+            font: 'Arial',
             size: 22,
           },
           paragraph: {
