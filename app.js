@@ -45,6 +45,7 @@ const els = {
   contactName: document.getElementById('contactName'),
   contactEmail: document.getElementById('contactEmail'),
   clientAddress: document.getElementById('clientAddress'),
+  clientAddress2: document.getElementById('clientAddress2'),
   subjectLine: document.getElementById('subjectLine'),
   scopeDate: document.getElementById('scopeDate'),
   signatory1Name: document.getElementById('signatory1Name'),
@@ -260,6 +261,7 @@ function getProjectInfo() {
     contactName: els.contactName.value.trim(),
     contactEmail: els.contactEmail.value.trim(),
     clientAddress: els.clientAddress.value.trim(),
+    clientAddress2: els.clientAddress2.value.trim(),
     subjectLine: els.subjectLine.value.trim(),
     regionalFramework: getRegionalFrameworkValue(),
     acreage: els.acreage.value.trim(),
@@ -305,6 +307,7 @@ function buildCoverLetterText(project) {
   if (project.contactName) lines.push(project.contactName);
   if (project.contactEmail) lines.push(project.contactEmail);
   if (project.clientAddress) lines.push(project.clientAddress);
+  if (project.clientAddress2) lines.push(project.clientAddress2);
 
   const subjectText = project.subjectLine || project.projectName || 'Scope of Work';
   lines.push(`Subject: ${subjectText}`);
@@ -773,8 +776,22 @@ async function exportToWord() {
     );
 
     if (project.clientAddress) {
-      pushLinesAsParagraphs(children, project.clientAddress, { after: 0 });
-    }
+  children.push(
+    makeParagraph(project.clientAddress, {
+      spacing: { after: 0 },
+      keepLines: true,
+    })
+  );
+}
+
+if (project.clientAddress2) {
+  children.push(
+    makeParagraph(project.clientAddress2, {
+      spacing: { after: 0 },
+      keepLines: true,
+    })
+  );
+}
 
     children.push(makeBlankParagraph());
 
@@ -1209,6 +1226,7 @@ function registerLivePreviewListeners() {
     els.contactName,
     els.contactEmail,
     els.clientAddress,
+    els.clientAddress2,
     els.subjectLine,
     els.scopeDate,
     els.signatory1Name,
