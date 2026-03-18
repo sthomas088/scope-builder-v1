@@ -641,13 +641,14 @@ async function exportToWord() {
     }));
 
     children.push(new Paragraph({
-      children: [
-        new TextRun(project.client || ''),
-        new TextRun('\t'),
-        new TextRun({ text: 'VIA EMAIL', bold: true })
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }]
-    }));
+  tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+  children: [
+    new TextRun(project.client || ''),
+    new TextRun('\t'),
+    new TextRun({ text: 'VIA EMAIL', bold: true })
+  ],
+  spacing: { after: 200 }
+}));
 
     children.push(new Paragraph({
       children: [
@@ -725,41 +726,49 @@ async function exportToWord() {
       text: 'Attachment A – Scope of Work and Fees'
     }));
 
+    children.push(new Paragraph({ spacing: { after: 300 } }));
     children.push(new Paragraph({ children: [new PageBreak()] }));
-  }
 
   // ===== ATTACHMENT A =====
 
   children.push(new Paragraph({
-    text: 'ATTACHMENT A',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+  children: [
+    new TextRun({ text: 'ATTACHMENT A', bold: true })
+  ],
+  alignment: AlignmentType.CENTER,
+  spacing: { after: 100 }
+}));
 
-  children.push(new Paragraph({
-    text: 'SCOPE OF WORK',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+children.push(new Paragraph({
+  children: [
+    new TextRun({ text: 'SCOPE OF WORK', bold: true })
+  ],
+  alignment: AlignmentType.CENTER
+}));
 
-  children.push(new Paragraph({
-    text: 'BIOLOGICAL CONSULTING SERVICES',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+children.push(new Paragraph({
+  children: [
+    new TextRun({ text: 'BIOLOGICAL CONSULTING SERVICES', bold: true })
+  ],
+  alignment: AlignmentType.CENTER,
+  spacing: { after: 200 }
+}));
 
-  children.push(new Paragraph({
-    text: (project.projectName || '').toUpperCase(),
-    alignment: AlignmentType.CENTER,
-    bold: true,
-    spacing: { after: 240 }
-  }));
+children.push(new Paragraph({
+  children: [
+    new TextRun({ text: (project.projectName || '').toUpperCase(), bold: true })
+  ],
+  alignment: AlignmentType.CENTER,
+  spacing: { after: 240 }
+}));
 
-  children.push(new Paragraph({
-    text: formatDisplayDate(project.date),
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 300 }
-  }));
+children.push(new Paragraph({
+  children: [
+    new TextRun(formatDisplayDate(project.date))
+  ],
+  alignment: AlignmentType.CENTER,
+  spacing: { after: 300 }
+}));
 
   // ===== TASKS =====
 
@@ -794,9 +803,23 @@ async function exportToWord() {
     }
   });
 
-  const doc = new Document({
-    sections: [{ children }]
-  });
+ const doc = new Document({
+  sections: [
+    {
+      properties: {
+        page: {
+          margin: {
+            top: convertInchesToTwip(1.25),
+            right: convertInchesToTwip(1),
+            bottom: convertInchesToTwip(1),
+            left: convertInchesToTwip(1),
+          },
+        },
+      },
+      children: children,
+    },
+  ],
+});
 
   const blob = await Packer.toBlob(doc);
   saveAs(blob, buildFileName(project.projectName, discipline, project.date));
