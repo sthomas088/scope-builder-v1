@@ -53,6 +53,8 @@ const els = {
   signatory1Title: document.getElementById('signatory1Title'),
   signatory2Name: document.getElementById('signatory2Name'),
   signatory2Title: document.getElementById('signatory2Title'),
+  loadProposalBtn: document.getElementById('loadProposalBtn'),
+  loadProposalInput: document.getElementById('loadProposalInput'),
 };
 
 function todayIsoDate() {
@@ -1234,6 +1236,52 @@ function handleSaveProposal() {
   saveAs(blob, fileName);
 }
 
+function handleLoadProposalClick() {
+  els.loadProposalInput.click();
+}
+
+function handleLoadProposalFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const project = data.formData || {};
+
+      for (const key in project) {
+        if (els[key] && typeof els[key].value !== 'undefined') {
+          els[key].value = project[key];
+        }
+      }
+
+      state.selectedTaskIds = new Set(data.selectedTaskIds || []);
+
+      if (data.editorContent) {
+        els.scopeEditor.innerHTML = data.editorContent;
+      } else {
+        els.scopeEditor.innerHTML = createDefaultEditorHtml();
+      }
+
+      renderTaskSection();
+      refreshPreviewDocument();
+
+      if (data.editorContent) {
+        els.exportBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Unable to load proposal file.');
+    } finally {
+      els.loadProposalInput.value = '';
+    }
+  };
+
+  reader.readAsText(file);
+}
+
 function registerLivePreviewListeners() {
   const fields = [
     els.coverLetterType,
@@ -1301,13 +1349,15 @@ function init() {
 
   els.generateBtn.addEventListener('click', handleRefreshPreview);
 els.saveProposalBtn.addEventListener('click', handleSaveProposal);
+els.loadProposalBtn.addEventListener('click', handleLoadProposalClick);
+els.loadProposalInput.addEventListener('change', handleLoadProposalFile);
 
 els.exportBtn.addEventListener('click', () => {
-    exportToWord().catch((error) => {
-      console.error(error);
-      alert('Unable to export document. Please try again.');
-    });
+  exportToWord().catch((error) => {
+    console.error(error);
+    alert('Unable to export document. Please try again.');
   });
+});
 
   els.scopeEditor.addEventListener('input', () => {
     els.exportBtn.disabled = !editorHasExportableContent();
