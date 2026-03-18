@@ -310,7 +310,7 @@ function buildCoverLetterText(project) {
   lines.push(`Subject: ${subjectText}`);
 
   const greetingName = project.contactName || 'Client';
-  lines.push(`Dear ${greetingName},`);
+  lines.push(`Dear ${greetingName}:`);
 
   const locationText =
     project.address ||
@@ -318,15 +318,14 @@ function buildCoverLetterText(project) {
     'the project site';
 
   let body =
-    `Please find Attachment A, Scope of Work for biological consulting services for the ${project.projectName || 'project'} ` +
-    `located at ${locationText}.`;
+    `Please find attached Attachment A, Scope of Work and Fee Estimate for biological consulting services for the ${project.projectName || 'project'} located at ${locationText}.`;
 
   if (project.coverLetterType === 'standard' || project.coverLetterType === 'expanded') {
     if (project.acreage) {
       body += ` The site encompasses approximately ${project.acreage}.`;
     }
     if (project.apn) {
-      body += ` Associated APN: ${project.apn}.`;
+      body += ` Associated APN${project.apn.includes(',') ? 's' : ''}: ${project.apn}.`;
     }
   }
 
@@ -343,34 +342,20 @@ function buildCoverLetterText(project) {
 function buildAttachmentAText(project, selectedTasks) {
   const header = [
     'ATTACHMENT A',
-    'SCOPE OF WORK',
-    'BIOLOGICAL CONSULTING SERVICES',
+    'SCOPE OF WORK AND FEE ESTIMATE',
     project.projectName || 'Project',
   ].join('\n');
 
   const taskSection = selectedTasks.length
     ? selectedTasks
         .map((task, index) => {
-          const titleLine = `${index + 1}. ${task.name}`;
+          const titleLine = `TASK ${index + 1} ${task.name}`;
           return `${titleLine}\n${task.description}`;
         })
         .join('\n\n')
     : 'No tasks selected.';
 
-  const deliverables = selectedTasks
-    .flatMap((task) => {
-      if (!task.deliverables) return [];
-      if (Array.isArray(task.deliverables)) return task.deliverables;
-      return [task.deliverables];
-    })
-    .filter(Boolean);
-
-  const deliverablesSection =
-    deliverables.length > 0
-      ? `\n\nDELIVERABLES\n${deliverables.map((item) => `- ${item}`).join('\n')}`
-      : '';
-
-  return `${header}\n\n${taskSection}${deliverablesSection}`;
+  return `${header}\n\n${taskSection}`;
 }
 
 function buildSignatureBlockHtml(project) {
@@ -390,26 +375,6 @@ function buildSignatureBlockHtml(project) {
   `;
 }
 
-function buildFullDocumentText(project, selectedTasks) {
-  const coverLetterText = buildCoverLetterText(project);
-  const attachmentText = buildAttachmentAText(project, selectedTasks);
-
-  if (!coverLetterText) return attachmentText;
-
-  const signatureText = [
-    '\n\n',
-    '____________________________________',
-    project.signatories[0]?.name || '',
-    project.signatories[0]?.title || '',
-    '\n\n',
-    '____________________________________',
-    project.signatories[1]?.name || '',
-    project.signatories[1]?.title || '',
-  ].join('\n');
-
-  return `${coverLetterText}${signatureText}\n\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n\n${attachmentText}`;
-}
-
 function buildPreviewDocumentHtml(project, selectedTasks) {
   const coverLetterText = buildCoverLetterText(project);
   const coverLetterParagraphs = coverLetterText
@@ -422,35 +387,21 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
   const attachmentTasksHtml = selectedTasks.length
     ? selectedTasks
         .map((task, index) => {
-          const feeDisplay = task.fee ? escapeHtml(String(task.fee)) : '$—';
+          const feeDisplay = task.fee ? escapeHtml(formatCurrency(parseFeeValue(task.fee))) : '$';
           return `
             <div class="document-task">
-              <div class="document-task-title">${escapeHtml(`TASK ${index + 1}`)}&nbsp;&nbsp;&nbsp;&nbsp;${escapeHtml(task.name || '')}<span style="float:right;">${feeDisplay}</span></div>
+              <div class="document-task-title">
+                ${escapeHtml(`TASK ${index + 1}`)}
+                <span style="display:inline-block; min-width: 1.5rem;"></span>
+                ${escapeHtml(task.name || '')}
+                <span style="float:right;">${feeDisplay}</span>
+              </div>
               <p class="document-task-text">${escapeHtml(task.description || '')}</p>
             </div>
           `;
         })
         .join('')
     : `<p class="document-paragraph">No tasks selected.</p>`;
-
-  const deliverables = selectedTasks
-    .flatMap((task) => {
-      if (!task.deliverables) return [];
-      if (Array.isArray(task.deliverables)) return task.deliverables;
-      return [task.deliverables];
-    })
-    .filter(Boolean);
-
-  const deliverablesHtml = deliverables.length
-    ? `
-      <div class="document-deliverables">
-        <div class="document-deliverables-title">DELIVERABLES</div>
-        <ul class="document-deliverables-list">
-          ${deliverables.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-        </ul>
-      </div>
-    `
-    : '';
 
   const coverSection = `
     <div class="document-section">
@@ -463,8 +414,8 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
     <div class="document-section">
       <div class="document-section-title">ATTACHMENT A – SCOPE OF WORK AND FEE ESTIMATE</div>
       ${project.projectName ? `<p class="document-paragraph"><strong>${escapeHtml(project.projectName)}</strong></p>` : ''}
+      ${project.date ? `<p class="document-paragraph"><strong>${escapeHtml(formatDisplayDate(project.date))}</strong></p>` : ''}
       ${attachmentTasksHtml}
-      ${deliverablesHtml}
     </div>
   `;
 
@@ -566,52 +517,8 @@ function buildFileName(projectName, discipline, date) {
   return `${cleanProjectName}_${discipline.filenamePrefix}_${date}.docx`;
 }
 
-function convertHtmlToPlainText(html) {
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-
-  temp.querySelectorAll('.document-page-break').forEach((el) => {
-    const replacement = document.createTextNode(
-      '\n----------------------------------------\nATTACHMENT A BEGINS\n----------------------------------------\n'
-    );
-    el.replaceWith(replacement);
-  });
-
-  temp.querySelectorAll('.document-signature-grid').forEach((grid) => {
-    const blocks = Array.from(grid.querySelectorAll('.document-signature-block'));
-    const lines = [];
-
-    blocks.forEach((block, index) => {
-      const name = block.querySelector('.document-signature-name')?.innerText?.trim() || '';
-      const title = block.querySelector('.document-signature-title')?.innerText?.trim() || '';
-      lines.push('____________________________________');
-      if (name) lines.push(name);
-      if (title) lines.push(title);
-      if (index < blocks.length - 1) lines.push('');
-    });
-
-    grid.replaceWith(document.createTextNode(`\n${lines.join('\n')}\n`));
-  });
-
-  return temp.innerText.replace(/\n{3,}/g, '\n\n').trim();
-}
-
-function buildDocParagraphsFromText(text) {
-  const { Paragraph } = window.docx;
-  const lines = text.split('\n');
-
-  return lines.map((line) => {
-    const trimmed = line.trim();
-    if (trimmed === '') return new Paragraph({ text: '' });
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      return new Paragraph({ text: trimmed.slice(2), bullet: { level: 0 } });
-    }
-    return new Paragraph({ text: line });
-  });
-}
-
 function parseFeeValue(fee) {
-  if (fee == null) return 0;
+  if (fee == null || fee === '') return 0;
   if (typeof fee === 'number' && Number.isFinite(fee)) return fee;
 
   const cleaned = String(fee).replace(/[^0-9.-]/g, '');
@@ -626,6 +533,13 @@ function formatCurrency(amount) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount || 0);
+}
+
+function formatFeeDisplay(fee) {
+  const parsed = parseFeeValue(fee);
+  if (!fee && fee !== 0) return '$';
+  if (parsed === 0 && String(fee).trim() === '') return '$';
+  return formatCurrency(parsed);
 }
 
 function isOptionalTask(task) {
@@ -713,17 +627,19 @@ async function exportToWord() {
     Header,
     Footer,
     PageNumber,
+    NumberFormat,
     SectionType,
     convertInchesToTwip,
   } = window.docx;
 
   const pageMarginTwips = convertInchesToTwip(1.0);
-
-  const coverRightTab = convertInchesToTwip(5.8);
-  const attachmentAmountTab = convertInchesToTwip(6.5);
+  const coverRightTab = convertInchesToTwip(6.5);
+  const signatureRightTab = convertInchesToTwip(5.9);
+  const subjectTab = convertInchesToTwip(1.0);
+  const taskTitleTab = convertInchesToTwip(1.4);
+  const taskAmountTab = convertInchesToTwip(6.5);
   const footerCenterTab = convertInchesToTwip(3.25);
   const footerRightTab = convertInchesToTwip(6.5);
-  const subjectTab = convertInchesToTwip(1.0);
 
   function makeRun(text = '', options = {}) {
     return new TextRun({
@@ -875,21 +791,21 @@ async function exportToWord() {
       children.push(
         makeJustifiedParagraph(
           paragraphText,
-          index === arr.length - 1 ? 220 : 180
+          index === arr.length - 1 ? 200 : 160
         )
       );
     });
 
     children.push(
       makeParagraph('Sincerely,', {
-        spacing: { after: 280 },
+        spacing: { after: 260 },
       })
     );
 
     if (secondarySignatory && (secondarySignatory.name || secondarySignatory.title)) {
       children.push(
         new Paragraph({
-          tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
+          tabStops: [{ type: TabStopType.RIGHT, position: signatureRightTab }],
           spacing: { after: 0 },
           keepLines: true,
           children: [
@@ -902,7 +818,7 @@ async function exportToWord() {
 
       children.push(
         new Paragraph({
-          tabStops: [{ type: TabStopType.RIGHT, position: coverRightTab }],
+          tabStops: [{ type: TabStopType.RIGHT, position: signatureRightTab }],
           spacing: { after: 220 },
           keepLines: true,
           children: [
@@ -954,7 +870,13 @@ async function exportToWord() {
             },
           },
           spacing: { after: 0 },
-          children: [makeRun(project.projectName || '', { italics: true, color: '7F7F7F', size: 16 })],
+          children: [
+            makeRun(project.projectName || '', {
+              italics: true,
+              color: '7F7F7F',
+              size: 16,
+            }),
+          ],
         }),
       ],
     });
@@ -982,7 +904,11 @@ async function exportToWord() {
             makeRun('A-'),
             PageNumber.CURRENT,
             makeRun('\t'),
-            makeRun('Scope of Work and Fee Estimate', { italics: true, color: '7F7F7F', size: 16 }),
+            makeRun('Scope of Work and Fee Estimate', {
+              italics: true,
+              color: '7F7F7F',
+              size: 16,
+            }),
           ],
         }),
       ],
@@ -991,12 +917,12 @@ async function exportToWord() {
 
   function buildTaskHeadingParagraph(taskNumber, taskName, feeText, optional = false) {
     const labelPrefix = optional ? `OPTIONAL TASK ${taskNumber}` : `TASK ${taskNumber}`;
-    const displayFee = feeText && String(feeText).trim() ? String(feeText).trim() : '$—';
+    const displayFee = feeText && String(feeText).trim() ? String(feeText).trim() : '$';
 
     return new Paragraph({
       tabStops: [
-        { type: TabStopType.LEFT, position: convertInchesToTwip(1.35) },
-        { type: TabStopType.RIGHT, position: attachmentAmountTab },
+        { type: TabStopType.LEFT, position: taskTitleTab },
+        { type: TabStopType.RIGHT, position: taskAmountTab },
       ],
       spacing: { after: 100 },
       keepLines: true,
@@ -1015,7 +941,6 @@ async function exportToWord() {
     return splitTextIntoParagraphs(text).map((paragraphText, index, arr) =>
       makeJustifiedParagraph(paragraphText, index === arr.length - 1 ? 140 : 110, {
         keepLines: true,
-        indent: { left: convertInchesToTwip(0.28) },
       })
     );
   }
@@ -1033,7 +958,6 @@ async function exportToWord() {
       alignment: AlignmentType.JUSTIFIED,
       spacing: { after: 160, line: 276 },
       keepLines: true,
-      indent: { left: convertInchesToTwip(0.28) },
       children: [
         makeRun('Deliverables: ', { italics: true }),
         makeRun(content, { italics: true }),
@@ -1043,7 +967,7 @@ async function exportToWord() {
 
   function buildTotalsParagraph(label, totalText) {
     return new Paragraph({
-      tabStops: [{ type: TabStopType.RIGHT, position: attachmentAmountTab }],
+      tabStops: [{ type: TabStopType.RIGHT, position: taskAmountTab }],
       spacing: { before: 80, after: 110 },
       keepLines: true,
       children: [
@@ -1057,21 +981,23 @@ async function exportToWord() {
   function buildAttachmentChildren() {
     const children = [];
 
-    buildAttachmentTitleLines(project).forEach((line, index) => {
+    buildAttachmentTitleLines(project).forEach((line) => {
       children.push(
         makeParagraph(line, {
-          alignment: AlignmentType.LEFT,
+          alignment: AlignmentType.CENTER,
           bold: true,
-          spacing: { after: index === 2 ? 0 : 10 },
+          spacing: { after: 15 },
           keepLines: true,
           keepNext: true,
         })
       );
     });
 
+    children.push(makeBlankParagraph(0));
+
     children.push(
       makeParagraph(formatDisplayDate(project.date), {
-        alignment: AlignmentType.LEFT,
+        alignment: AlignmentType.CENTER,
         bold: true,
         spacing: { after: 220 },
         keepLines: true,
@@ -1094,7 +1020,7 @@ async function exportToWord() {
 
     orderedTasks.forEach((task, index) => {
       const optional = isOptionalTask(task);
-      const feeText = task.fee ? String(task.fee) : '$—';
+      const feeText = formatFeeDisplay(task.fee);
 
       children.push(
         buildTaskHeadingParagraph(index + 1, task.name, feeText, optional)
@@ -1104,12 +1030,7 @@ async function exportToWord() {
       if (taskParagraphs.length) {
         children.push(...taskParagraphs);
       } else {
-        children.push(
-          makeParagraph('', {
-            spacing: { after: 120 },
-            indent: { left: convertInchesToTwip(0.28) },
-          })
-        );
+        children.push(makeParagraph('', { spacing: { after: 120 } }));
       }
 
       const deliverablesParagraph = buildDeliverablesParagraph(task.deliverables);
@@ -1122,17 +1043,21 @@ async function exportToWord() {
     const grandTotal = orderedTasks.reduce((sum, task) => sum + parseFeeValue(task.fee), 0);
 
     if (baseTasks.length > 0) {
+      const firstTaskNumber = 1;
+      const lastTaskNumber = baseTasks.length;
       const baseLabel =
-        baseTasks.length === 1
-          ? 'TOTAL TASK 1'
-          : `TOTAL TASKS 1 AND ${baseTasks.length}`;
+        firstTaskNumber === lastTaskNumber
+          ? `TOTAL TASK ${firstTaskNumber}`
+          : `TOTAL TASKS ${firstTaskNumber}—${lastTaskNumber}`;
       children.push(buildTotalsParagraph(baseLabel, formatCurrency(baseTotal)));
     }
 
     if (optionalTasks.length > 0) {
+      const firstTaskNumber = 1;
+      const lastTaskNumber = orderedTasks.length;
       children.push(
         buildTotalsParagraph(
-          'TOTAL INCLUDING OPTIONAL TASKS',
+          `TOTAL TASKS ${firstTaskNumber}—${lastTaskNumber} INCLUDING OPTIONAL TASKS`,
           formatCurrency(grandTotal)
         )
       );
@@ -1187,6 +1112,10 @@ async function exportToWord() {
               right: pageMarginTwips,
               bottom: convertInchesToTwip(0.7),
               left: pageMarginTwips,
+            },
+            pageNumbers: {
+              start: 1,
+              formatType: NumberFormat.DECIMAL,
             },
           },
         },
