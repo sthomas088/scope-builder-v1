@@ -1001,51 +1001,61 @@ async function exportToWord() {
 
     children.push(makeBlankParagraph());
 
-    children.push(
-      makeParagraph('ATTACHMENT A', {
-        alignment: AlignmentType.CENTER,
-        bold: true,
-        spacing: { after: 0 },
-        keepLines: true,
-        keepNext: true,
-      })
-    );
+children.push(
+  makeParagraph('ATTACHMENT A', {
+    alignment: AlignmentType.CENTER,
+    bold: true,
+    spacing: { after: 0 },
+    keepLines: true,
+    keepNext: true,
+  })
+);
 
-    children.push(makeBlankParagraph());
+children.push(makeBlankParagraph());
 
-    children.push(
-      makeParagraph('SCOPE OF WORK AND FEE ESTIMATE', {
-        alignment: AlignmentType.CENTER,
-        bold: true,
-        spacing: { after: 0 },
-        keepLines: true,
-        keepNext: true,
-      })
-    );
+children.push(
+  makeParagraph('SCOPE OF WORK AND FEE ESTIMATE', {
+    alignment: AlignmentType.CENTER,
+    bold: true,
+    spacing: { after: 0 },
+    keepLines: true,
+    keepNext: true,
+  })
+);
 
-    children.push(
-      makeParagraph((project.projectName || 'PROJECT SITE').toUpperCase(), {
-        alignment: AlignmentType.CENTER,
-        bold: true,
-        spacing: { after: 0 },
-        keepLines: true,
-        keepNext: true,
-      })
-    );
+children.push(
+  makeParagraph('BIOLOGICAL CONSULTING SERVICES', {
+    alignment: AlignmentType.CENTER,
+    bold: true,
+    spacing: { after: 0 },
+    keepLines: true,
+    keepNext: true,
+  })
+);
 
-    children.push(makeBlankParagraph());
+children.push(
+  makeParagraph((project.projectName || 'PROJECT SITE').toUpperCase(), {
+    alignment: AlignmentType.CENTER,
+    bold: true,
+    spacing: { after: 0 },
+    keepLines: true,
+    keepNext: true,
+  })
+);
 
-    children.push(
-      makeParagraph(formatDisplayDate(project.date), {
-        alignment: AlignmentType.CENTER,
-        bold: true,
-        spacing: { after: 0 },
-        keepLines: true,
-        keepNext: true,
-      })
-    );
+children.push(makeBlankParagraph());
 
-    children.push(makeBlankParagraph());
+children.push(
+  makeParagraph(formatDisplayDate(project.date), {
+    alignment: AlignmentType.CENTER,
+    bold: true,
+    spacing: { after: 0 },
+    keepLines: true,
+    keepNext: true,
+  })
+);
+
+children.push(makeBlankParagraph());
 
     const baseTasks = selectedTasks.filter((task) => !isOptionalTask(task));
     const optionalTasks = selectedTasks.filter((task) => isOptionalTask(task));
