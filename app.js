@@ -218,7 +218,7 @@ function renderCategoryGroup(categoryName, tasks, index) {
 
 function renderTaskSection() {
   const discipline = getSelectedDiscipline();
-  state.selectedTaskIds.clear();
+
 
   if (!discipline) {
     els.taskCategoryLabel.textContent = 'Select a discipline to load tasks.';
@@ -1215,13 +1215,14 @@ function handleSaveProposal() {
   const project = getProjectInfo();
 
   const payload = {
-    schemaVersion: 1,
-    savedAt: new Date().toISOString(),
-    formData: project,
-    selectedTaskIds: Array.from(state.selectedTaskIds),
-    coverLetterType: project.coverLetterType,
-    editorContent: els.scopeEditor.innerHTML || '',
-  };
+  schemaVersion: 1,
+  savedAt: new Date().toISOString(),
+  discipline: els.discipline.value,
+  formData: project,
+  selectedTaskIds: Array.from(state.selectedTaskIds),
+  coverLetterType: project.coverLetterType,
+  editorContent: els.scopeEditor.innerHTML || '',
+};
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: 'application/json',
@@ -1257,16 +1258,21 @@ function handleLoadProposalFile(event) {
         }
       }
 
-      state.selectedTaskIds = new Set(data.selectedTaskIds || []);
+      if (data.discipline) {
+  els.discipline.value = data.discipline;
+}
 
-      if (data.editorContent) {
-        els.scopeEditor.innerHTML = data.editorContent;
-      } else {
-        els.scopeEditor.innerHTML = createDefaultEditorHtml();
-      }
+state.selectedTaskIds = new Set(data.selectedTaskIds || []);
 
-      renderTaskSection();
-      refreshPreviewDocument();
+renderTaskSection();
+refreshPreviewDocument();
+
+if (data.editorContent) {
+  els.scopeEditor.innerHTML = data.editorContent;
+  els.exportBtn.disabled = false;
+} else {
+  els.scopeEditor.innerHTML = createDefaultEditorHtml();
+}
 
       if (data.editorContent) {
         els.exportBtn.disabled = false;
