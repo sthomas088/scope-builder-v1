@@ -608,6 +608,91 @@ function buildDocParagraphsFromText(text) {
   });
 }
 
+function parseFeeValue(fee) {
+  if (fee == null) return 0;
+  if (typeof fee === 'number' && Number.isFinite(fee)) return fee;
+
+  const cleaned = String(fee).replace(/[^0-9.-]/g, '');
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount || 0);
+}
+
+function isOptionalTask(task) {
+  return Boolean(
+    task?.optional === true ||
+    task?.isOptional === true ||
+    task?.taskType === 'optional' ||
+    /optional/i.test(task?.category || '')
+  );
+}
+
+function getPrimarySignatory(project) {
+  const populated = (project.signatories || []).filter((s) => s?.name || s?.title);
+  return populated[0] || { name: '', title: '' };
+}
+
+function getSecondarySignatory(project) {
+  const populated = (project.signatories || []).filter((s) => s?.name || s?.title);
+  return populated[1] || null;
+}
+
+function splitTextIntoParagraphs(text) {
+  if (!text) return [];
+  return String(text)
+    .replace(/\r\n/g, '\n')
+    .split(/\n\s*\n/)
+    .map((part) => part.replace(/\n+/g, ' ').trim())
+    .filter(Boolean);
+}
+
+function buildCoverLetterBodyParagraphs(project) {
+  const locationText =
+    project.address ||
+    [project.city, project.county, project.state].filter(Boolean).join(', ') ||
+    'the project site';
+
+  let intro =
+    `Please find attached Attachment A, Scope of Work and Fee Estimate for biological consulting services for the ${project.projectName || 'project'} located at ${locationText}.`;
+
+  if (project.coverLetterType === 'standard' || project.coverLetterType === 'expanded') {
+    if (project.acreage) {
+      intro += ` The site encompasses approximately ${project.acreage}.`;
+    }
+    if (project.apn) {
+      intro += ` Associated APN${project.apn.includes(',') ? 's' : ''}: ${project.apn}.`;
+    }
+  }
+
+  const paragraphs = [intro];
+
+  if (project.coverLetterType === 'expanded' && project.generalProjectUnderstanding) {
+    paragraphs.push(project.generalProjectUnderstanding.trim());
+  }
+
+  paragraphs.push('We appreciate the opportunity to support your team.');
+
+  return paragraphs;
+}
+
+function buildAttachmentTitleLines(project) {
+  const projectName = (project.projectName || 'PROJECT SITE').toUpperCase();
+
+  return [
+    'ATTACHMENT A',
+    'SCOPE OF WORK AND FEE ESTIMATE',
+    projectName,
+  ];
+}
+
 async function exportToWord() {
   if (!validateForExport()) return;
 
@@ -622,180 +707,493 @@ async function exportToWord() {
     TextRun,
     AlignmentType,
     TabStopType,
-    TabStopPosition,
-    PageBreak,
+    BorderStyle,
+    Header,
+    Footer,
+    PageNumber,
+    SectionType,
     convertInchesToTwip,
   } = window.docx;
 
-  const rightTab = convertInchesToTwip(6.5);
-  const subjectTab = convertInchesToTwip(1.2);
+  const PAGE_WIDTH = 8.5;
+  const LEFT_RIGHT_MARGIN = 1.0;
+  const BODY_WIDTH = PAGE_WIDTH - (LEFT_RIGHT_MARGIN * 2);
 
-  const children = [];
+  const rightTab = convertInchesToTwip(PAGE_WIDTH - LEFT_RIGHT_MARGIN);
+  const centerTab = convertInchesToTwip(PAGE_WIDTH / 2);
+  const subjectTab = convertInchesToTwip(1.1);
+  const amountTab = convertInchesToTwip(PAGE_WIDTH - LEFT_RIGHT_MARGIN);
+  const pageMarginTwips = convertInchesToTwip(1.0);
 
-  // ===== COVER LETTER =====
+  function makeRun(text = '', options = {}) {
+    return new TextRun({
+      text,
+      font: 'Times New Roman',
+      size: 22,
+      ...options,
+    });
+  }
 
-  if (project.coverLetterType !== 'none') {
-    children.push(new Paragraph({
-      text: formatDisplayDate(project.date),
-      spacing: { after: 240 }
-    }));
+  function makeParagraph(text = '', options = {}) {
+    const {
+      bold = false,
+      italics = false,
+      alignment,
+      spacing,
+      tabStops,
+      indent,
+      border,
+      keepLines,
+      keepNext,
+      children,
+      style,
+      pageBreakBefore,
+    } = options;
 
-    children.push(new Paragraph({
-      children: [
-        new TextRun(project.client || ''),
-        new TextRun('\t'),
-        new TextRun({ text: 'VIA EMAIL', bold: true })
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }]
-    }));
-
-    children.push(new Paragraph({
-      children: [
-        new TextRun(project.contactName || ''),
-        new TextRun('\t'),
-        new TextRun(project.contactEmail || '')
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }]
-    }));
-
-    if (project.clientAddress) {
-      project.clientAddress.split('\n').forEach(line => {
-        children.push(new Paragraph({ text: line }));
+    if (children) {
+      return new Paragraph({
+        children,
+        alignment,
+        spacing,
+        tabStops,
+        indent,
+        border,
+        keepLines,
+        keepNext,
+        style,
+        pageBreakBefore,
       });
     }
 
-    children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
-
-    children.push(new Paragraph({
-      children: [
-        new TextRun({ text: 'Subject:', bold: true }),
-        new TextRun('\t'),
-        new TextRun(project.subjectLine || project.projectName)
-      ],
-      tabStops: [{ type: TabStopType.LEFT, position: subjectTab }],
-      spacing: { after: 240 }
-    }));
-
-    children.push(new Paragraph({
-      text: `Dear ${project.contactName || 'Client'}:`,
-      spacing: { after: 240 }
-    }));
-
-    const location =
-      project.address ||
-      [project.city, project.county, project.state].filter(Boolean).join(', ');
-
-    let body = `Please find attached Attachment A, Scope of Work for biological consulting services for the ${project.projectName} located at ${location}.`;
-
-    if (project.acreage) body += ` The site encompasses approximately ${project.acreage}.`;
-    if (project.apn) body += ` APN: ${project.apn}.`;
-
-    children.push(new Paragraph({ text: body, spacing: { after: 240 } }));
-
-    children.push(new Paragraph({
-      text: 'We appreciate the opportunity to support your team.',
-      spacing: { after: 240 }
-    }));
-
-    children.push(new Paragraph({
-      text: 'Sincerely,',
-      spacing: { after: 360 }
-    }));
-
-    children.push(new Paragraph({
-      children: [
-        new TextRun(project.signatories[0]?.name || ''),
-        new TextRun('\t'),
-        new TextRun(project.signatories[1]?.name || '')
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }]
-    }));
-
-    children.push(new Paragraph({
-      children: [
-        new TextRun(project.signatories[0]?.title || ''),
-        new TextRun('\t'),
-        new TextRun(project.signatories[1]?.title || '')
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
-      spacing: { after: 240 }
-    }));
-
-    children.push(new Paragraph({
-      text: 'Attachment A – Scope of Work and Fees'
-    }));
-
-    children.push(new Paragraph({ children: [new PageBreak()] }));
+    return new Paragraph({
+      children: [makeRun(text, { bold, italics })],
+      alignment,
+      spacing,
+      tabStops,
+      indent,
+      border,
+      keepLines,
+      keepNext,
+      style,
+      pageBreakBefore,
+    });
   }
 
-  // ===== ATTACHMENT A =====
+  function makeBlankParagraph(after = 120) {
+    return new Paragraph({
+      children: [makeRun('')],
+      spacing: { after },
+    });
+  }
 
-  children.push(new Paragraph({
-    text: 'ATTACHMENT A',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+  function makeJustifiedParagraph(text, spacingAfter = 120, extraOptions = {}) {
+    return makeParagraph(text, {
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: spacingAfter, line: 276 },
+      ...extraOptions,
+    });
+  }
 
-  children.push(new Paragraph({
-    text: 'SCOPE OF WORK',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+  function pushLinesAsParagraphs(target, blockText, options = {}) {
+    if (!blockText) return;
+    String(blockText)
+      .replace(/\r\n/g, '\n')
+      .split('\n')
+      .map((line) => line.trim())
+      .forEach((line) => {
+        target.push(
+          makeParagraph(line, {
+            spacing: { after: options.after ?? 0 },
+            keepLines: true,
+          })
+        );
+      });
+  }
 
-  children.push(new Paragraph({
-    text: 'BIOLOGICAL CONSULTING SERVICES',
-    alignment: AlignmentType.CENTER,
-    bold: true
-  }));
+  function buildCoverLetterChildren() {
+    const children = [];
+    const primarySignatory = getPrimarySignatory(project);
+    const secondarySignatory = getSecondarySignatory(project);
+    const subjectText = project.subjectLine || project.projectName || 'Scope of Work';
+    const greetingName = project.contactName || 'Client';
 
-  children.push(new Paragraph({
-    text: (project.projectName || '').toUpperCase(),
-    alignment: AlignmentType.CENTER,
-    bold: true,
-    spacing: { after: 240 }
-  }));
+    children.push(
+      makeParagraph(formatDisplayDate(project.date), {
+        spacing: { after: 220 },
+      })
+    );
 
-  children.push(new Paragraph({
-    text: formatDisplayDate(project.date),
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 300 }
-  }));
+    if (project.client || project.contactName || project.contactEmail) {
+      children.push(
+        new Paragraph({
+          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          spacing: { after: 0 },
+          keepLines: true,
+          children: [
+            makeRun(project.client || ''),
+            makeRun('\t'),
+            makeRun('VIA EMAIL', { bold: true }),
+          ],
+        })
+      );
 
-  // ===== TASKS =====
-
-  selectedTasks.forEach((task, i) => {
-    children.push(new Paragraph({
-      children: [
-        new TextRun({ text: `TASK ${i + 1} – ${task.name.toUpperCase()}`, bold: true }),
-        new TextRun('\t'),
-        new TextRun({ text: task.fee || '', bold: true })
-      ],
-      tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
-      spacing: { after: 160 }
-    }));
-
-    children.push(new Paragraph({
-      text: task.description,
-      spacing: { after: 200 }
-    }));
-
-    if (task.deliverables) {
-      const text = Array.isArray(task.deliverables)
-        ? task.deliverables.join('; ')
-        : task.deliverables;
-
-      children.push(new Paragraph({
-        children: [
-          new TextRun({ text: 'Deliverables: ', italics: true }),
-          new TextRun({ text: text, italics: true })
-        ],
-        spacing: { after: 220 }
-      }));
+      if (project.contactName || project.contactEmail) {
+        children.push(
+          new Paragraph({
+            tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+            spacing: { after: 0 },
+            keepLines: true,
+            children: [
+              makeRun(project.contactName || ''),
+              makeRun('\t'),
+              makeRun(project.contactEmail || ''),
+            ],
+          })
+        );
+      }
     }
-  });
+
+    if (project.clientAddress) {
+      pushLinesAsParagraphs(children, project.clientAddress, { after: 0 });
+    }
+
+    children.push(makeBlankParagraph(140));
+
+    children.push(
+      new Paragraph({
+        tabStops: [{ type: TabStopType.LEFT, position: subjectTab }],
+        spacing: { after: 220 },
+        keepLines: true,
+        children: [
+          makeRun('Subject:', { bold: true }),
+          makeRun('\t'),
+          makeRun(subjectText),
+        ],
+      })
+    );
+
+    children.push(
+      makeParagraph(`Dear ${greetingName}:`, {
+        spacing: { after: 220 },
+      })
+    );
+
+    buildCoverLetterBodyParagraphs(project).forEach((paragraphText, index, arr) => {
+      children.push(
+        makeJustifiedParagraph(
+          paragraphText,
+          index === arr.length - 1 ? 220 : 180
+        )
+      );
+    });
+
+    children.push(
+      makeParagraph('Sincerely,', {
+        spacing: { after: 360 },
+      })
+    );
+
+    if (secondarySignatory && (secondarySignatory.name || secondarySignatory.title)) {
+      children.push(
+        new Paragraph({
+          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          spacing: { after: 0 },
+          keepLines: true,
+          children: [
+            makeRun(primarySignatory.name || ''),
+            makeRun('\t'),
+            makeRun(secondarySignatory.name || ''),
+          ],
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          spacing: { after: 220 },
+          keepLines: true,
+          children: [
+            makeRun(primarySignatory.title || ''),
+            makeRun('\t'),
+            makeRun(secondarySignatory.title || ''),
+          ],
+        })
+      );
+    } else {
+      if (primarySignatory.name) {
+        children.push(
+          makeParagraph(primarySignatory.name, {
+            spacing: { after: 0 },
+            keepLines: true,
+          })
+        );
+      }
+      if (primarySignatory.title) {
+        children.push(
+          makeParagraph(primarySignatory.title, {
+            spacing: { after: 220 },
+            keepLines: true,
+          })
+        );
+      }
+    }
+
+    children.push(
+      makeParagraph('Attachment A – Scope of Work and Fee Estimate', {
+        spacing: { after: 0 },
+      })
+    );
+
+    return children;
+  }
+
+  function buildAttachmentHeader() {
+    return new Header({
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          border: {
+            bottom: {
+              style: BorderStyle.SINGLE,
+              size: 4,
+              color: 'A6A6A6',
+              space: 1,
+            },
+          },
+          spacing: { after: 0 },
+          children: [makeRun(project.projectName || '', { italics: true, color: '7F7F7F', size: 16 })],
+        }),
+      ],
+    });
+  }
+
+  function buildAttachmentFooter() {
+    return new Footer({
+      children: [
+        new Paragraph({
+          border: {
+            top: {
+              style: BorderStyle.SINGLE,
+              size: 4,
+              color: 'A6A6A6',
+              space: 1,
+            },
+          },
+          tabStops: [
+            { type: TabStopType.CENTER, position: centerTab },
+            { type: TabStopType.RIGHT, position: rightTab },
+          ],
+          spacing: { before: 120, after: 0 },
+          children: [
+            makeRun('\t'),
+            makeRun('A-'),
+            PageNumber.CURRENT,
+            makeRun('\t'),
+            makeRun('Scope of Work and Fee Estimate', { italics: true, color: '7F7F7F', size: 16 }),
+          ],
+        }),
+      ],
+    });
+  }
+
+  function buildTaskHeadingParagraph(taskNumber, taskName, feeText, optional = false) {
+    const label = optional
+      ? `OPTIONAL TASK ${taskNumber} – ${String(taskName || '').toUpperCase()}`
+      : `TASK ${taskNumber} – ${String(taskName || '').toUpperCase()}`;
+
+    return new Paragraph({
+      tabStops: [{ type: TabStopType.RIGHT, position: amountTab }],
+      spacing: { after: 120 },
+      keepLines: true,
+      keepNext: true,
+      children: [
+        makeRun(label, { bold: true }),
+        makeRun('\t'),
+        makeRun(feeText || '', { bold: true }),
+      ],
+    });
+  }
+
+  function buildTaskDescriptionParagraphs(text) {
+    return splitTextIntoParagraphs(text).map((paragraphText, index, arr) =>
+      makeJustifiedParagraph(paragraphText, index === arr.length - 1 ? 150 : 120, {
+        keepLines: true,
+      })
+    );
+  }
+
+  function buildDeliverablesParagraph(deliverables) {
+    if (!deliverables) return null;
+
+    const content = Array.isArray(deliverables)
+      ? deliverables.filter(Boolean).join('; ')
+      : String(deliverables).trim();
+
+    if (!content) return null;
+
+    return new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 180, line: 276 },
+      keepLines: true,
+      children: [
+        makeRun('Deliverables: ', { italics: true }),
+        makeRun(content, { italics: true }),
+      ],
+    });
+  }
+
+  function buildTotalsParagraph(label, totalText) {
+    return new Paragraph({
+      tabStops: [{ type: TabStopType.RIGHT, position: amountTab }],
+      spacing: { before: 60, after: 120 },
+      keepLines: true,
+      children: [
+        makeRun(label, { bold: true, italics: true }),
+        makeRun('\t'),
+        makeRun(totalText, { bold: true }),
+      ],
+    });
+  }
+
+  function buildAttachmentChildren() {
+    const children = [];
+
+    buildAttachmentTitleLines(project).forEach((line, index) => {
+      children.push(
+        makeParagraph(line, {
+          alignment: AlignmentType.CENTER,
+          bold: true,
+          spacing: { after: index === 0 ? 20 : index === 1 ? 20 : 0 },
+          keepLines: true,
+          keepNext: true,
+        })
+      );
+    });
+
+    children.push(
+      makeParagraph(formatDisplayDate(project.date), {
+        alignment: AlignmentType.CENTER,
+        bold: true,
+        spacing: { after: 220 },
+        keepLines: true,
+        keepNext: true,
+      })
+    );
+
+    const baseTasks = selectedTasks.filter((task) => !isOptionalTask(task));
+    const optionalTasks = selectedTasks.filter((task) => isOptionalTask(task));
+    const orderedTasks = [...baseTasks, ...optionalTasks];
+
+    if (!orderedTasks.length) {
+      children.push(
+        makeParagraph('No tasks selected.', {
+          spacing: { after: 120 },
+        })
+      );
+      return children;
+    }
+
+    orderedTasks.forEach((task, index) => {
+      const optional = isOptionalTask(task);
+      const feeText = task.fee ? String(task.fee) : '';
+      children.push(
+        buildTaskHeadingParagraph(index + 1, task.name, feeText, optional)
+      );
+
+      const taskParagraphs = buildTaskDescriptionParagraphs(task.description || '');
+      if (taskParagraphs.length) {
+        children.push(...taskParagraphs);
+      } else {
+        children.push(makeParagraph('', { spacing: { after: 120 } }));
+      }
+
+      const deliverablesParagraph = buildDeliverablesParagraph(task.deliverables);
+      if (deliverablesParagraph) {
+        children.push(deliverablesParagraph);
+      }
+    });
+
+    const baseTotal = baseTasks.reduce((sum, task) => sum + parseFeeValue(task.fee), 0);
+    const grandTotal = orderedTasks.reduce((sum, task) => sum + parseFeeValue(task.fee), 0);
+
+    if (baseTasks.length > 0) {
+      const baseLabel =
+        baseTasks.length === 1
+          ? 'TOTAL TASK 1'
+          : `TOTAL TASKS 1 AND ${baseTasks.length}`;
+      children.push(buildTotalsParagraph(baseLabel, formatCurrency(baseTotal)));
+    }
+
+    if (optionalTasks.length > 0) {
+      children.push(
+        buildTotalsParagraph(
+          'TOTAL INCLUDING OPTIONAL TASKS',
+          formatCurrency(grandTotal)
+        )
+      );
+    }
+
+    return children;
+  }
+
+  const coverLetterChildren = buildCoverLetterChildren();
+  const attachmentChildren = buildAttachmentChildren();
 
   const doc = new Document({
-    sections: [{ children }]
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: 'Times New Roman',
+            size: 22,
+          },
+          paragraph: {
+            spacing: {
+              line: 276,
+            },
+          },
+        },
+      },
+    },
+    sections: [
+      ...(project.coverLetterType !== 'none'
+        ? [
+            {
+              properties: {
+                page: {
+                  margin: {
+                    top: pageMarginTwips,
+                    right: pageMarginTwips,
+                    bottom: pageMarginTwips,
+                    left: pageMarginTwips,
+                  },
+                },
+              },
+              children: coverLetterChildren,
+            },
+          ]
+        : []),
+      {
+        properties: {
+          type: project.coverLetterType !== 'none' ? SectionType.NEXT_PAGE : undefined,
+          page: {
+            margin: {
+              top: convertInchesToTwip(0.7),
+              right: pageMarginTwips,
+              bottom: convertInchesToTwip(0.7),
+              left: pageMarginTwips,
+            },
+          },
+        },
+        headers: {
+          default: buildAttachmentHeader(),
+        },
+        footers: {
+          default: buildAttachmentFooter(),
+        },
+        children: attachmentChildren,
+      },
+    ],
   });
 
   const blob = await Packer.toBlob(doc);
