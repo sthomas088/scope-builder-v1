@@ -605,6 +605,7 @@ function buildAttachmentTitleLines(project) {
   return [
     'ATTACHMENT A',
     'SCOPE OF WORK AND FEE ESTIMATE',
+    'BIOLOGICAL CONSULTING SERVICES',
     projectName,
   ];
 }
