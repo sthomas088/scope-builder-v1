@@ -14,6 +14,7 @@ const els = {
   coverLetterType: document.getElementById('coverLetterType'),
   previewModeBtn: document.getElementById('previewModeBtn'),
   editorModeBtn: document.getElementById('editorModeBtn'),
+  saveProposalBtn: document.getElementById('saveProposalBtn'),
   sendPreviewToEditorBtn: document.getElementById('sendPreviewToEditorBtn'),
   restorePreviousEditorBtn: document.getElementById('restorePreviousEditorBtn'),
   documentModeMessage: document.getElementById('documentModeMessage'),
@@ -1208,6 +1209,31 @@ function handleRefreshPreview() {
   setDocumentMode('preview');
 }
 
+function handleSaveProposal() {
+  const project = getProjectInfo();
+
+  const payload = {
+    schemaVersion: 1,
+    savedAt: new Date().toISOString(),
+    formData: project,
+    selectedTaskIds: Array.from(state.selectedTaskIds),
+    coverLetterType: project.coverLetterType,
+    editorContent: els.scopeEditor.innerHTML || '',
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json',
+  });
+
+  const fileNameBase = (project.projectName || 'proposal')
+    .replace(/\s+/g, '_')
+    .toLowerCase();
+
+  const fileName = `${fileNameBase}_scopebuilder.json`;
+
+  saveAs(blob, fileName);
+}
+
 function registerLivePreviewListeners() {
   const fields = [
     els.coverLetterType,
@@ -1274,8 +1300,9 @@ function init() {
   els.restorePreviousEditorBtn.addEventListener('click', restorePreviousEditorVersion);
 
   els.generateBtn.addEventListener('click', handleRefreshPreview);
+els.saveProposalBtn.addEventListener('click', handleSaveProposal);
 
-  els.exportBtn.addEventListener('click', () => {
+els.exportBtn.addEventListener('click', () => {
     exportToWord().catch((error) => {
       console.error(error);
       alert('Unable to export document. Please try again.');
