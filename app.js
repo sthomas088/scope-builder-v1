@@ -6,7 +6,7 @@ const state = {
 };
 
 function createDefaultEditorHtml() {
-  return `<p class="document-placeholder">Select tasks and review the live preview. Then click "Send to Editor".</p>`;
+  return `<p class="document-placeholder">Select tasks and review the live preview. Then click "Export to Editor".</p>`;
 }
 
 const els = {
@@ -447,11 +447,14 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
 
 function updateDocumentActionsVisibility() {
   const inPreview = state.currentDocumentMode === 'preview';
+
   els.sendPreviewToEditorBtn.classList.toggle('hidden', !inPreview);
   els.restorePreviousEditorBtn.classList.toggle(
     'hidden',
     inPreview || !state.previousEditorContent
   );
+
+  els.exportBtn.disabled = state.currentDocumentMode !== 'editor' || !editorHasExportableContent();
 }
 
 function setDocumentMode(mode) {
@@ -480,7 +483,7 @@ function refreshPreviewDocument() {
   const selectedTasks = discipline ? getSelectedTasks(discipline) : [];
 
   els.previewDocument.innerHTML = buildPreviewDocumentHtml(project, selectedTasks);
-  els.exportBtn.disabled = !editorHasExportableContent();
+  updateDocumentActionsVisibility();
 }
 
 function sendPreviewToEditor() {
@@ -498,15 +501,14 @@ function sendPreviewToEditor() {
 
   state.previousEditorContent = els.scopeEditor.innerHTML;
   els.scopeEditor.innerHTML = newEditorHtml;
-  els.exportBtn.disabled = false;
   setDocumentMode('editor');
+  updateDocumentActionsVisibility();
 }
 
 function restorePreviousEditorVersion() {
   const currentContent = els.scopeEditor.innerHTML;
   els.scopeEditor.innerHTML = state.previousEditorContent || createDefaultEditorHtml();
   state.previousEditorContent = currentContent;
-  els.exportBtn.disabled = !editorHasExportableContent();
   updateDocumentActionsVisibility();
 }
 
@@ -1258,11 +1260,11 @@ function handleClearProposal() {
   updateRegionalFrameworkVisibility();
   updateCoverLetterTypeVisibility();
 
-  renderTaskSection();
+    renderTaskSection();
 
   els.scopeEditor.innerHTML = createDefaultEditorHtml();
-  els.exportBtn.disabled = true;
   setDocumentMode('preview');
+  updateDocumentActionsVisibility();
 }
 
 function handleSaveProposal() {
@@ -1323,14 +1325,11 @@ refreshPreviewDocument();
 
 if (data.editorContent) {
   els.scopeEditor.innerHTML = data.editorContent;
-  els.exportBtn.disabled = false;
 } else {
   els.scopeEditor.innerHTML = createDefaultEditorHtml();
 }
 
-      if (data.editorContent) {
-        els.exportBtn.disabled = false;
-      }
+updateDocumentActionsVisibility();
     } catch (error) {
       console.error(error);
       alert('Unable to load proposal file.');
