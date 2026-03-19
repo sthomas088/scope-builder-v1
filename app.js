@@ -24,7 +24,7 @@ const els = {
   taskCategoryLabel: document.getElementById('taskCategoryLabel'),
   taskList: document.getElementById('taskList'),
   generateBtn: document.getElementById('generateBtn'),
-  topExportBtn: document.getElementById('topExportBtn'),
+  exportBtn: document.getElementById('exportBtn'),
   scopeEditor: document.getElementById('scopeEditor'),
   projectName: document.getElementById('projectName'),
   projectAddress: document.getElementById('projectAddress'),
@@ -454,12 +454,7 @@ function updateDocumentActionsVisibility() {
     inPreview || !state.previousEditorContent
   );
 
-  els.topExportBtn.disabled = state.currentDocumentMode !== 'editor' || !editorHasExportableContent();
-  if (state.currentDocumentMode === 'editor') {
-  els.topExportBtn.title = 'Export document to Word';
-} else {
-  els.topExportBtn.title = 'Send to Editor to export to Word';
-}
+  els.exportBtn.disabled = state.currentDocumentMode !== 'editor' || !editorHasExportableContent();
 }
 
 function setDocumentMode(mode) {
@@ -1416,7 +1411,7 @@ els.saveProposalBtn.addEventListener('click', handleSaveProposal);
 els.loadProposalBtn.addEventListener('click', handleLoadProposalClick);
 els.loadProposalInput.addEventListener('change', handleLoadProposalFile);
 
-els.topExportBtn.addEventListener('click', () => {
+els.exportBtn.addEventListener('click', () => {
   exportToWord().catch((error) => {
     console.error(error);
     alert('Unable to export document. Please try again.');
@@ -1424,7 +1419,7 @@ els.topExportBtn.addEventListener('click', () => {
 });
 
   els.scopeEditor.addEventListener('input', () => {
-    els.topexportBtn.disabled = !editorHasExportableContent();
+    els.exportBtn.disabled = !editorHasExportableContent();
   });
 
   registerLivePreviewListeners();
@@ -1435,7 +1430,7 @@ els.topExportBtn.addEventListener('click', () => {
       console.error(error);
       els.previewDocument.innerHTML = '<p class="document-placeholder">Error loading task library.</p>';
       els.scopeEditor.innerHTML = '<p class="document-placeholder">Error loading task library.</p>';
-      els.topexportBtn.disabled = true;
+      els.exportBtn.disabled = true;
     });
 }
 
