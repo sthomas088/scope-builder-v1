@@ -398,7 +398,7 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
             <div class="document-task">
               <div class="document-task-title">
                 ${escapeHtml(`TASK ${index + 1}`)}
-                <span style="display:inline-block; min-width: 1.5rem;"></span>
+                <span style="display:inline-block; min-width: 1rem;"></span>
                 ${escapeHtml(task.name || '')}
                 <span style="float:right;">${feeDisplay}</span>
               </div>
@@ -410,17 +410,24 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
     : `<p class="document-paragraph">No tasks selected.</p>`;
 
   const coverSection = `
-    <div class="document-section">
+    <div class="document-section document-cover-section">
       ${coverLetterParagraphs}
       ${project.coverLetterType === 'none' ? '' : buildSignatureBlockHtml(project)}
+      ${project.coverLetterType === 'none'
+        ? ''
+        : `<p class="document-paragraph">Attachment A – Scope of Work and Fee Estimate</p>`}
     </div>
   `;
 
   const attachmentSection = `
-    <div class="document-section">
-      <div class="document-section-title">ATTACHMENT A – SCOPE OF WORK AND FEE ESTIMATE</div>
-      ${project.projectName ? `<p class="document-paragraph"><strong>${escapeHtml(project.projectName)}</strong></p>` : ''}
-      ${project.date ? `<p class="document-paragraph"><strong>${escapeHtml(formatDisplayDate(project.date))}</strong></p>` : ''}
+    <div class="document-section document-attachment-section">
+      <div class="document-attachment-header">
+        <div class="document-section-title">ATTACHMENT A</div>
+        <div class="document-section-title">SCOPE OF WORK AND FEE ESTIMATE</div>
+        <div class="document-section-title">BIOLOGICAL CONSULTING SERVICES</div>
+        ${project.projectName ? `<p class="document-paragraph"><strong>${escapeHtml(project.projectName.toUpperCase())}</strong></p>` : ''}
+        ${project.date ? `<p class="document-paragraph"><strong>${escapeHtml(formatDisplayDate(project.date))}</strong></p>` : ''}
+      </div>
       ${attachmentTasksHtml}
     </div>
   `;
@@ -431,9 +438,6 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
 
   return `
     ${coverSection}
-    <div class="document-page-break">
-      <span class="document-page-break-label">Attachment A Begins</span>
-    </div>
     ${attachmentSection}
   `;
 }
