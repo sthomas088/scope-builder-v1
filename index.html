@@ -28,51 +28,70 @@
       <section class="workspace" aria-label="Scope builder workspace">
         <div class="left-panel" aria-label="Configuration panel">
           <section class="card" aria-labelledby="cover-letter-toggle-heading">
-            <h2 id="cover-letter-toggle-heading">Cover Letter</h2>
-            <label>
-              Cover Letter
-              <select id="coverLetterType">
-                <option value="none">None</option>
-                <option value="simple" selected>Simple</option>
-                <option value="standard">Standard</option>
-                <option value="expanded">Expanded</option>
-              </select>
-            </label>
+            <h2 id="cover-letter-toggle-heading">Cover Letter Type</h2>
+            <select id="coverLetterType" aria-label="Cover Letter Type">
+              <option value="none">None</option>
+              <option value="simple" selected>Simple</option>
+              <option value="standard">Standard</option>
+              <option value="expanded">Expanded</option>
+            </select>
           </section>
 
           <section class="card" aria-labelledby="client-cover-heading">
-  <h2 id="client-cover-heading">Client / Cover Letter Information</h2>
-  <div class="grid">
-    <label>
-      Client
-      <input type="text" id="client" required />
-    </label>
-    <label>
-      Contact Name
-      <input type="text" id="contactName" />
-    </label>
-    <label>
-      Contact Email
-      <input type="email" id="contactEmail" />
-    </label>
-    <label>
-      Client Address Line 1
-      <input type="text" id="clientAddress" />
-    </label>
-    <label>
-      Client Address Line 2
-      <input type="text" id="clientAddress2" placeholder="City, State ZIP" />
-    </label>
-    <label class="full-width">
-      Subject Line
-      <input type="text" id="subjectLine" />
-    </label>
-    <label>
-      Date
-      <input type="date" id="scopeDate" required />
-    </label>
-  </div>
-</section>
+            <h2 id="client-cover-heading">Client / Cover Letter Information</h2>
+            <div class="grid">
+              <label>
+                Client
+                <input type="text" id="client" required />
+              </label>
+              <label>
+                Contact Name
+                <input type="text" id="contactName" />
+              </label>
+              <label>
+                Contact Email
+                <input type="email" id="contactEmail" />
+              </label>
+              <label>
+                Client Address Line 1
+                <input type="text" id="clientAddress" />
+              </label>
+              <label>
+                Client Address Line 2
+                <input type="text" id="clientAddress2" placeholder="City, State ZIP" />
+              </label>
+              <label class="full-width">
+                Subject Line
+                <input type="text" id="subjectLine" />
+              </label>
+              <label>
+                Date
+                <input type="date" id="scopeDate" required />
+              </label>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="signatories-heading">
+            <h2 id="signatories-heading">Signatories</h2>
+            <div class="grid">
+              <label>
+                Name
+                <input type="text" id="signatory1Name" />
+              </label>
+              <label>
+                Title
+                <input type="text" id="signatory1Title" />
+              </label>
+              <label>
+                Name
+                <input type="text" id="signatory2Name" />
+              </label>
+              <label>
+                Title
+                <input type="text" id="signatory2Title" />
+              </label>
+            </div>
+          </section>
 
           <section class="card" aria-labelledby="project-info-heading">
             <h2 id="project-info-heading">Project Information</h2>
@@ -146,28 +165,6 @@
             </div>
           </section>
 
-          <section class="card" aria-labelledby="signatories-heading">
-            <h2 id="signatories-heading">Signatories</h2>
-            <div class="grid">
-              <label>
-                Name
-                <input type="text" id="signatory1Name" />
-              </label>
-              <label>
-                Title
-                <input type="text" id="signatory1Title" />
-              </label>
-              <label>
-                Name
-                <input type="text" id="signatory2Name" />
-              </label>
-              <label>
-                Title
-                <input type="text" id="signatory2Title" />
-              </label>
-            </div>
-          </section>
-
           <section class="card" aria-labelledby="tasks-heading">
             <h2 id="tasks-heading">Bio Tasks</h2>
             <p id="taskCategoryLabel" class="task-category-label">Select a discipline to load tasks.</p>
@@ -175,13 +172,11 @@
           </section>
 
           <div class="actions">
-  <button id="generateBtn">Refresh Preview</button>
-  <button id="exportBtn">Export to Word</button>
-  <button id="saveProposalBtn">Save Proposal</button>
-  <button id="loadProposalBtn">Load Proposal</button>
-
-  <input type="file" id="loadProposalInput" accept=".json" style="display:none;">
-</div>
+            <button id="generateBtn" type="button">Refresh Preview</button>
+            <button id="saveProposalBtn" type="button">Save Proposal</button>
+            <button id="loadProposalBtn" type="button">Load Proposal</button>
+            <input type="file" id="loadProposalInput" accept=".json" style="display:none;">
+          </div>
         </div>
 
         <section class="right-panel card" aria-labelledby="document-heading">
@@ -205,6 +200,10 @@
               >
                 Editor
               </button>
+            </div>
+
+            <div class="document-toolbar-actions">
+              <button id="exportBtn" type="button" disabled>Export to Word</button>
             </div>
           </div>
 
