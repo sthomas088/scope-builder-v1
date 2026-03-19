@@ -519,3 +519,58 @@ button:disabled {
     gap: 1rem;
   }
 }
+
+/* ===== UI PATCHES ===== */
+
+/* Remove signature lines + unbold names */
+.document-signature-line {
+  display: none;
+}
+
+.document-signature-name {
+  font-weight: 400;
+}
+
+/* Center Attachment A header */
+.document-attachment-header {
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.document-attachment-header .document-section-title,
+.document-attachment-header .document-paragraph {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Slightly larger headers */
+h2 {
+  font-size: 1.45rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+/* Widen layout slightly */
+.workspace {
+  grid-template-columns: minmax(340px, 1.05fr) minmax(600px, 1.6fr);
+}
+
+/* Keep regional framework on one line */
+#regionalFrameworkWrap {
+  grid-column: span 2;
+}
+
+/* Make preview feel like a document */
+.document-view {
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* Tighter header spacing */
+.document-section-title {
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.03em;
+}
