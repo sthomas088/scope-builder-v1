@@ -11,6 +11,7 @@ function createDefaultEditorHtml() {
 
 const els = {
   discipline: document.getElementById('discipline'),
+  exportBtn: document.getElementById('exportBtn'),
   coverLetterType: document.getElementById('coverLetterType'),
   previewModeBtn: document.getElementById('previewModeBtn'),
   editorModeBtn: document.getElementById('editorModeBtn'),
@@ -455,6 +456,11 @@ function updateDocumentActionsVisibility() {
   );
 
   els.exportBtn.disabled = state.currentDocumentMode !== 'editor' || !editorHasExportableContent();
+  if (state.currentDocumentMode === 'editor') {
+  els.exportBtn.title = "Export to Word";
+} else {
+  els.exportBtn.title = "Send to Editor to export to Word";
+}
 }
 
 function setDocumentMode(mode) {
