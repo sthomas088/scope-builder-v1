@@ -438,6 +438,9 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
 
   return `
     ${coverSection}
+    <div class="document-page-break">
+      <span class="document-page-break-label">Attachment A Begins Here</span>
+    </div>
     ${attachmentSection}
   `;
 }
@@ -1215,6 +1218,53 @@ function handleRefreshPreview() {
   setDocumentMode('preview');
 }
 
+function handleClearProposal() {
+  const confirmed = window.confirm(
+    'This will clear the current proposal, including selected tasks and unsaved editor changes. Continue?'
+  );
+  if (!confirmed) return;
+
+  els.coverLetterType.value = 'simple';
+
+  els.client.value = '';
+  els.contactName.value = '';
+  els.contactEmail.value = '';
+  els.clientAddress.value = '';
+  els.clientAddress2.value = '';
+  els.subjectLine.value = '';
+  els.scopeDate.value = todayIsoDate();
+
+  els.projectName.value = '';
+  els.projectAddress.value = '';
+  els.projectCity.value = '';
+  els.projectCounty.value = '';
+  els.customProjectCounty.value = '';
+  els.projectState.value = 'CA';
+  els.regionalFramework.value = 'None';
+  els.customRegionalFramework.value = '';
+  els.acreage.value = '';
+  els.apn.value = '';
+  els.generalProjectUnderstanding.value = '';
+
+  els.signatory1Name.value = '';
+  els.signatory1Title.value = '';
+  els.signatory2Name.value = '';
+  els.signatory2Title.value = '';
+
+  state.selectedTaskIds.clear();
+  state.previousEditorContent = '';
+
+  updateCountyInputVisibility();
+  updateRegionalFrameworkVisibility();
+  updateCoverLetterTypeVisibility();
+
+  renderTaskSection();
+
+  els.scopeEditor.innerHTML = createDefaultEditorHtml();
+  els.exportBtn.disabled = true;
+  setDocumentMode('preview');
+}
+
 function handleSaveProposal() {
   const project = getProjectInfo();
 
@@ -1357,7 +1407,7 @@ function init() {
   els.sendPreviewToEditorBtn.addEventListener('click', sendPreviewToEditor);
   els.restorePreviousEditorBtn.addEventListener('click', restorePreviousEditorVersion);
 
-  els.generateBtn.addEventListener('click', handleRefreshPreview);
+  els.generateBtn.addEventListener('click', handleClearProposal);
 els.saveProposalBtn.addEventListener('click', handleSaveProposal);
 els.loadProposalBtn.addEventListener('click', handleLoadProposalClick);
 els.loadProposalInput.addEventListener('change', handleLoadProposalFile);
