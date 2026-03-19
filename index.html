@@ -25,7 +25,7 @@
   </div>
 
   <div class="top-actions" aria-label="Quick actions">
-    <button id="sendPreviewToEditorBtn" type="button">Send to Editor</button>
+    <button id="exportBtn" type="button" disabled>Export to Word</button>
   </div>
 </section>
 
@@ -177,7 +177,6 @@
 
           <div class="actions">
   <button id="generateBtn" type="button">Clear Proposal</button>
-  <button id="exportBtn" type="button">Export to Word</button>
   <button id="saveProposalBtn" type="button">Save Proposal</button>
   <button id="loadProposalBtn" type="button">Load Proposal</button>
 
@@ -187,26 +186,27 @@
 
         <section class="right-panel card" aria-labelledby="document-heading">
           <div class="document-toolbar">
-            <div class="mode-toggle" role="tablist" aria-label="Document mode">
-              <button
-                id="previewModeBtn"
-                class="mode-tab active"
-                type="button"
-                role="tab"
-                aria-selected="true"
-              >
-                Preview
-              </button>
-              <button
-                id="editorModeBtn"
-                class="mode-tab"
-                type="button"
-                role="tab"
-                aria-selected="false"
-              >
-                Editor
-              </button>
-            </div>
+  <div class="mode-toggle" role="tablist" aria-label="Document mode">
+    <button
+      id="previewModeBtn"
+      class="mode-tab active"
+      type="button"
+      role="tab"
+      aria-selected="true"
+    >
+      Preview
+    </button>
+    <button
+      id="editorModeBtn"
+      class="mode-tab"
+      type="button"
+      role="tab"
+      aria-selected="false"
+    >
+      Editor
+    </button>
+  </div>
+</div>
 
             <div class="document-toolbar-actions">
               <button id="exportBtn" type="button" disabled>Export to Word</button>
@@ -214,6 +214,7 @@
           </div>
 
           <div class="document-actions-row">
+  <button id="sendPreviewToEditorBtn" type="button">Export to Editor</button>
   <button id="restorePreviousEditorBtn" type="button" class="secondary-button hidden">
     Restore Previous Version
   </button>
