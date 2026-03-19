@@ -455,7 +455,7 @@ function updateDocumentActionsVisibility() {
     inPreview || !state.previousEditorContent
   );
 
-  els.exportBtn.disabled = state.currentDocumentMode !== 'editor' || !editorHasExportableContent();
+  els.exportBtn.disabled = state.currentDocumentMode !== 'editor';
   if (state.currentDocumentMode === 'editor') {
   els.exportBtn.title = "Export to Word";
 } else {
