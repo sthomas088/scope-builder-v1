@@ -622,27 +622,6 @@ h3 {
   min-height: calc(14in - 2in);
 }
 
-#previewDocument,
-#scopeEditor {
-  position: relative;
-  background-image:
-    linear-gradient(to bottom,
-      transparent calc(11in - 2in - 1px),
-      #dbe2ea calc(11in - 2in - 1px),
-      #dbe2ea calc(11in - 2in),
-      transparent calc(11in - 2in)
-    );
-  background-size: 100% calc(11in - 2in);
-  background-repeat: repeat-y;
-}
-
-.page-break-guide {
-  text-align: center;
-  font-size: 0.72rem;
-  color: #94a3b8;
-  margin: 0.35rem 0;
-}
-
 /* Restore dashed divider and center its label */
 .document-page-break {
   margin: 1.35rem 0 1.15rem;
