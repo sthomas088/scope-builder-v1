@@ -290,15 +290,14 @@ button:disabled {
 }
 
 .document-actions-row {
-  display: flex;
-  gap: 0.5rem;
+  display: grid;
+  justify-content: start;
   margin-bottom: 0.4rem;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-start;
 }
 
-.document-actions-row button {
+.document-actions-row > button {
+  grid-area: 1 / 1;
+  min-width: 155px;
   height: 34px;
 }
 
@@ -762,15 +761,15 @@ h3 {
 
 /* Right-pane action row */
 .document-actions-row {
-  display: flex;
-  gap: 0.35rem;
+  display: grid;
+  justify-content: start;
   margin-bottom: 0.4rem;
-  flex-wrap: nowrap;
-  align-items: center;
 }
 
 .document-actions-row > button {
+  grid-area: 1 / 1;
   min-width: 155px;
+  height: 34px;
 }
 
 .button-slot-hidden {
