@@ -449,11 +449,11 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
 function updateDocumentActionsVisibility() {
   const inPreview = state.currentDocumentMode === 'preview';
 
-  els.sendPreviewToEditorBtn.classList.toggle('hidden', !inPreview);
+  els.sendPreviewToEditorBtn.classList.toggle('button-slot-hidden', !inPreview);
   els.restorePreviousEditorBtn.classList.toggle(
-    'hidden',
-    inPreview || !state.previousEditorContent
-  );
+  'button-slot-hidden',
+  inPreview || !state.previousEditorContent
+);
 
   els.exportBtn.disabled = state.currentDocumentMode !== 'editor';
   if (state.currentDocumentMode === 'editor') {
