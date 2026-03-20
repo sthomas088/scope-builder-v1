@@ -619,7 +619,7 @@ h3 {
   border-radius: 4px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   padding: 1in;
-  min-height: calc(11in - 2in);
+  min-height: calc(14in - 2in);
 }
 
 /* Restore dashed divider and center its label */
