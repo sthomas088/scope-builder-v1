@@ -296,7 +296,6 @@ button:disabled {
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 0.2rem;
 }
 
 .document-actions-row button {
