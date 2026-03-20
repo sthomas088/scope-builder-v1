@@ -364,7 +364,7 @@ button:disabled {
 }
 
 .document-page-break {
-  margin: 1.35rem 0 1.15rem;
+  margin: 4.75rem 0 1.25rem;
   border-top: 1px dashed #cbd5e1;
   position: relative;
 }
@@ -519,6 +519,7 @@ button:disabled {
 /* Center Attachment A header */
 .document-attachment-header {
   text-align: center;
+  margin-top: 1.5rem;
   margin-bottom: 1.2rem;
 }
 
@@ -627,7 +628,7 @@ h3 {
 
 /* Restore dashed divider and center its label */
 .document-page-break {
-  margin: 1.35rem 0 3rem;
+  margin: 4.5rem 0 1.5rem;
   border-top: 1px dashed #cbd5e1;
   position: relative;
   text-align: center;
@@ -646,7 +647,7 @@ h3 {
 /* Keep attachment header centered */
 .document-attachment-header {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   margin-bottom: 1.2rem;
 }
 
