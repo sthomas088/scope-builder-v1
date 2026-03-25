@@ -498,9 +498,8 @@ button:disabled {
     padding: 0.95rem 1rem 1.1rem;
   }
 
-.document-attachment-wrapper {
-  position: relative;
-  min-height: 9.4in;
+.document-attachment-section {
+  min-height: 11in;
   background-image:
     linear-gradient(
       to bottom,
