@@ -369,7 +369,7 @@ button:disabled {
 }
 
 .document-page-break {
-  margin: 4.75rem 0 1.25rem;
+  margin: 6rem 0 0.75rem;
   border-top: 1px dashed #cbd5e1;
   position: relative;
 }
