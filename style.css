@@ -368,12 +368,6 @@ button:disabled {
   line-height: 1.42;
 }
 
-.document-page-break {
-  margin: 6rem 0 0.75rem;
-  border-top: 1px dashed #cbd5e1;
-  position: relative;
-}
-
 .document-page-break-label {
   display: inline-block;
   position: relative;
@@ -503,6 +497,20 @@ button:disabled {
     max-width: 100%;
     padding: 0.95rem 1rem 1.1rem;
   }
+
+.document-attachment-wrapper {
+  position: relative;
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent calc(9.4in - 1px),
+      #dbe2ea calc(9.4in - 1px),
+      #dbe2ea 9.4in,
+      transparent 9.4in
+    );
+  background-size: 100% 9.4in;
+  background-repeat: repeat-y;
+}
 
   .document-signature-grid {
     grid-template-columns: 1fr;
