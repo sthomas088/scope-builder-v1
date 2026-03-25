@@ -500,6 +500,7 @@ button:disabled {
 
 .document-attachment-wrapper {
   position: relative;
+  min-height: 9.4in;
   background-image:
     linear-gradient(
       to bottom,
@@ -507,7 +508,7 @@ button:disabled {
       rgba(15, 23, 42, 0.04) calc(9.4in - 8px),
       rgba(15, 23, 42, 0.08) calc(9.4in - 4px),
       rgba(15, 23, 42, 0.12) calc(9.4in - 2px),
-      rgba(15, 23, 42, 0.15) calc(9.4in),
+      rgba(15, 23, 42, 0.15) 9.4in,
       transparent 9.4in
     );
   background-size: 100% 9.4in;
