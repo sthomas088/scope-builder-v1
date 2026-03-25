@@ -438,12 +438,15 @@ function buildPreviewDocumentHtml(project, selectedTasks) {
   }
 
   return `
-    ${coverSection}
-    <div class="document-page-break">
-      <span class="document-page-break-label">Attachment A Begins Here</span>
-    </div>
+  ${coverSection}
+  <div class="document-page-break">
+    <span class="document-page-break-label">Attachment A Begins Here</span>
+  </div>
+
+  <div class="document-attachment-wrapper">
     ${attachmentSection}
-  `;
+  </div>
+`;
 }
 
 function updateDocumentActionsVisibility() {
