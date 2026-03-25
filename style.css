@@ -333,8 +333,15 @@ button:disabled {
   padding: 1.2rem;
   line-height: 1.45;
   white-space: normal;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge/IE */
 }
 
+.document-view::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
 
 .document-editor {
   outline: none;
