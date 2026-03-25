@@ -498,21 +498,7 @@ button:disabled {
     padding: 0.95rem 1rem 1.1rem;
   }
 
-.document-attachment-section {
-  min-height: 11in;
-  background-image:
-    linear-gradient(
-      to bottom,
-      transparent calc(9.4in - 8px),
-      rgba(15, 23, 42, 0.04) calc(9.4in - 8px),
-      rgba(15, 23, 42, 0.08) calc(9.4in - 4px),
-      rgba(15, 23, 42, 0.12) calc(9.4in - 2px),
-      rgba(15, 23, 42, 0.15) 9.4in,
-      transparent 9.4in
-    );
-  background-size: 100% 9.4in;
-  background-repeat: repeat-y;
-}
+
 
   .document-signature-grid {
     grid-template-columns: 1fr;
@@ -639,6 +625,22 @@ h3 {
   padding-bottom: 0.5in;
   padding-left: 1in;
   min-height: 14in;
+}
+
+.document-attachment-wrapper {
+  min-height: 11in;
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent calc(9.4in - 8px),
+      rgba(15, 23, 42, 0.04) calc(9.4in - 8px),
+      rgba(15, 23, 42, 0.08) calc(9.4in - 4px),
+      rgba(15, 23, 42, 0.12) calc(9.4in - 2px),
+      rgba(15, 23, 42, 0.15) 9.4in,
+      transparent 9.4in
+    );
+  background-size: 100% 9.4in;
+  background-repeat: repeat-y;
 }
 
 /* Restore dashed divider and center its label */
