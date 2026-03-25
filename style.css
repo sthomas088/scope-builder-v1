@@ -71,6 +71,7 @@ h3 {
   flex-direction: column;
   min-width: 0;
   overflow: visible;
+  padding-bottom: 1.5rem;
 }
 
 .card {
@@ -335,6 +336,7 @@ button:disabled {
   white-space: normal;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* old Edge/IE */
+  margin-bottom: 1.5rem;
 }
 
 .document-view::-webkit-scrollbar {
