@@ -627,6 +627,35 @@ h3 {
   min-height: 14in;
 }
 
+.document-attachment-wrapper {
+  position: relative;
+  min-height: 9.4in;
+}
+
+.document-attachment-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1in;
+  bottom: 0;
+  left: -1in;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(9.4in - 10px),
+    rgba(15, 23, 42, 0.025) calc(9.4in - 6px),
+    rgba(15, 23, 42, 0.05) calc(9.4in - 3px),
+    rgba(15, 23, 42, 0.08) 9.4in,
+    transparent calc(9.4in + 1px)
+  );
+  background-repeat: repeat-y;
+}
+
+.document-attachment-wrapper > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* Restore dashed divider and center its label */
 .document-page-break {
