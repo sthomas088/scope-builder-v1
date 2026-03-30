@@ -331,12 +331,11 @@ button:disabled {
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #eef2f7;
-  padding: 1.2rem;
+  padding: 1.2rem 1.2rem 2.5rem 1.2rem;
   line-height: 1.45;
   white-space: normal;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* old Edge/IE */
-  margin-bottom: 2rem;
 }
 
 .document-view::-webkit-scrollbar {
@@ -494,7 +493,6 @@ button:disabled {
 
   .right-panel {
     min-height: auto;
-    padding-bottom: 2rem;
   }
 
   .document-view {
