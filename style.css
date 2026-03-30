@@ -131,12 +131,35 @@ textarea {
 }
 
 .task-item {
-  display: flex;
-  gap: 0.38rem;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 0.5rem;
+  align-items: start;
   padding: 0.34rem;
   border-radius: 7px;
   background: #f8fafc;
+}
+
+.task-item-main {
+  display: flex;
+  gap: 0.38rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.task-text {
+  min-width: 0;
+}
+
+.task-fee-input {
+  width: 100%;
+  text-align: right;
+}
+
+.fee-default {
+  color: #b91c1c;
+  border-color: #ef4444;
+  background: #fef2f2;
 }
 
 .task-group {
