@@ -1,7 +1,6 @@
 const state = {
   disciplines: [],
   selectedTaskIds: new Set(),
-  taskFees: {},
   currentDocumentMode: 'preview',
   previousEditorContent: '',
 };
@@ -183,51 +182,22 @@ function renderCategoryGroup(categoryName, tasks, index) {
     panel.appendChild(empty);
   } else {
     tasks.forEach((task) => {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'task-item';
+      const wrapper = document.createElement('label');
+      wrapper.className = 'task-item';
 
-  const leftWrap = document.createElement('label');
-  leftWrap.className = 'task-item-main';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = task.id;
+      checkbox.checked = state.selectedTaskIds.has(task.id);
 
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.value = task.id;
-  checkbox.checked = state.selectedTaskIds.has(task.id);
-
-  checkbox.addEventListener('change', (event) => {
-    if (event.target.checked) {
-      state.selectedTaskIds.add(task.id);
-    } else {
-      state.selectedTaskIds.delete(task.id);
-    }
-    refreshPreviewDocument();
-  });
-
-  const textWrap = document.createElement('span');
-  textWrap.className = 'task-text';
-  textWrap.innerHTML = `<strong>${task.name}</strong><br>${task.description}`;
-
-  leftWrap.append(checkbox, textWrap);
-
-  const feeInput = document.createElement('input');
-  feeInput.type = 'text';
-  feeInput.className = 'task-fee-input';
-  feeInput.placeholder = '$';
-  feeInput.value = getTaskFeeValue(task);
-
-  if (isUsingDefaultFee(task)) {
-    feeInput.classList.add('fee-default');
-  }
-
-  feeInput.addEventListener('input', (event) => {
-    state.taskFees[task.id] = event.target.value;
-    feeInput.classList.remove('fee-default');
-    refreshPreviewDocument();
-  });
-
-  wrapper.append(leftWrap, feeInput);
-  panel.appendChild(wrapper);
-});
+      checkbox.addEventListener('change', (event) => {
+        if (event.target.checked) {
+          state.selectedTaskIds.add(task.id);
+        } else {
+          state.selectedTaskIds.delete(task.id);
+        }
+        refreshPreviewDocument();
+      });
 
       const textWrap = document.createElement('span');
       textWrap.innerHTML = `<strong>${task.name}</strong><br>${task.description}`;
@@ -279,12 +249,7 @@ function renderTaskSection() {
 
 function getSelectedTasks(discipline) {
   const allTasks = Array.isArray(discipline?.tasks) ? discipline.tasks : [];
-  return allTasks
-    .filter((task) => state.selectedTaskIds.has(task.id))
-    .map((task) => ({
-      ...task,
-      fee: getTaskFeeValue(task),
-    }));
+  return allTasks.filter((task) => state.selectedTaskIds.has(task.id));
 }
 
 function getProjectInfo() {
@@ -332,25 +297,6 @@ function formatDisplayDate(dateValue) {
     month: 'long',
     day: 'numeric',
   });
-}
-
-function getTaskFeeValue(task) {
-  const userFee = state.taskFees[task.id];
-  const defaultFee = task.defaultFee ?? '';
-
-  return userFee !== undefined && userFee !== null && userFee !== ''
-    ? userFee
-    : defaultFee;
-}
-
-function isUsingDefaultFee(task) {
-  const userFee = state.taskFees[task.id];
-  return (
-    (userFee === undefined || userFee === null || userFee === '') &&
-    task.defaultFee !== undefined &&
-    task.defaultFee !== null &&
-    task.defaultFee !== ''
-  );
 }
 
 function buildCoverLetterText(project) {
@@ -1317,7 +1263,6 @@ function handleClearProposal() {
   els.signatory2Title.value = '';
 
   state.selectedTaskIds.clear();
-  state.taskFees = {};
   state.previousEditorContent = '';
 
   updateCountyInputVisibility();
@@ -1334,16 +1279,15 @@ function handleClearProposal() {
 function handleSaveProposal() {
   const project = getProjectInfo();
 
-    const payload = {
-    schemaVersion: 1,
-    savedAt: new Date().toISOString(),
-    discipline: els.discipline.value,
-    formData: project,
-    selectedTaskIds: Array.from(state.selectedTaskIds),
-    taskFees: state.taskFees,
-    coverLetterType: project.coverLetterType,
-    editorContent: els.scopeEditor.innerHTML || '',
-  };
+  const payload = {
+  schemaVersion: 1,
+  savedAt: new Date().toISOString(),
+  discipline: els.discipline.value,
+  formData: project,
+  selectedTaskIds: Array.from(state.selectedTaskIds),
+  coverLetterType: project.coverLetterType,
+  editorContent: els.scopeEditor.innerHTML || '',
+};
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: 'application/json',
@@ -1384,7 +1328,6 @@ function handleLoadProposalFile(event) {
 }
 
 state.selectedTaskIds = new Set(data.selectedTaskIds || []);
-state.taskFees = data.taskFees || {};
 
 renderTaskSection();
 refreshPreviewDocument();
