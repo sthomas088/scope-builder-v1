@@ -1,6 +1,7 @@
 const state = {
   disciplines: [],
   selectedTaskIds: new Set(),
+  taskFees: {},
   currentDocumentMode: 'preview',
   previousEditorContent: '',
 };
@@ -200,9 +201,21 @@ function renderCategoryGroup(categoryName, tasks, index) {
       });
 
       const textWrap = document.createElement('span');
-      textWrap.innerHTML = `<strong>${task.name}</strong><br>${task.description}`;
-      wrapper.append(checkbox, textWrap);
-      panel.appendChild(wrapper);
+textWrap.innerHTML = `<strong>${task.name}</strong><br>${task.description}`;
+
+const feeInput = document.createElement('input');
+feeInput.type = 'text';
+feeInput.className = 'task-fee-input';
+feeInput.placeholder = '$';
+feeInput.value = getTaskFee(task.id);
+
+feeInput.addEventListener('input', (event) => {
+  state.taskFees[task.id] = event.target.value;
+  refreshPreviewDocument();
+});
+
+wrapper.append(checkbox, textWrap, feeInput);
+panel.appendChild(wrapper);
     });
   }
 
@@ -249,7 +262,12 @@ function renderTaskSection() {
 
 function getSelectedTasks(discipline) {
   const allTasks = Array.isArray(discipline?.tasks) ? discipline.tasks : [];
-  return allTasks.filter((task) => state.selectedTaskIds.has(task.id));
+  return allTasks
+    .filter((task) => state.selectedTaskIds.has(task.id))
+    .map((task) => ({
+      ...task,
+      fee: state.taskFees[task.id] || '',
+    }));
 }
 
 function getProjectInfo() {
@@ -297,6 +315,10 @@ function formatDisplayDate(dateValue) {
     month: 'long',
     day: 'numeric',
   });
+}
+
+function getTaskFee(taskId) {
+  return state.taskFees[taskId] || '';
 }
 
 function buildCoverLetterText(project) {
