@@ -857,6 +857,37 @@ h3 {
   text-align: right;
 }
 
+.collapsible-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible-card .card-header h2 {
+  margin-bottom: 0;
+}
+
+.collapsible-card .card-body {
+  margin-top: 0.35rem;
+}
+
+.card-arrow {
+  display: inline-block;
+  transition: transform 0.16s ease;
+  font-size: 0.68rem;
+  color: #334155;
+}
+
+.collapsible-card.expanded .card-arrow {
+  transform: rotate(90deg);
+}
+
+.collapsible-card.collapsed .card-body {
+  display: none;
+}
+
 @media (max-width: 980px) {
   .top-controls {
     grid-template-columns: 1fr;
