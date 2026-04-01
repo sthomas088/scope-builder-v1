@@ -880,6 +880,10 @@ h3 {
   color: #334155;
 }
 
+.task-category-header span {
+  font-size: 1rem;
+}
+
 .task-category-header::before {
   font-size: 1rem;
 }
