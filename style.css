@@ -876,8 +876,12 @@ h3 {
 .card-arrow {
   display: inline-block;
   transition: transform 0.16s ease;
-  font-size: 0.68rem;
+  font-size: 1rem;
   color: #334155;
+}
+
+.task-category-header::before {
+  font-size: 1rem;
 }
 
 .collapsible-card.expanded .card-arrow {
