@@ -1406,6 +1406,21 @@ function registerLivePreviewListeners() {
   });
 }
 
+function initCollapsibleSections() {
+  document.querySelectorAll('.collapsible-card').forEach((card) => {
+    const header = card.querySelector('.card-header');
+
+    if (!header) return;
+
+    header.addEventListener('click', () => {
+      const isExpanded = card.classList.contains('expanded');
+
+      card.classList.toggle('expanded', !isExpanded);
+      card.classList.toggle('collapsed', isExpanded);
+    });
+  });
+}
+
 function init() {
   els.scopeDate.value = todayIsoDate();
   els.scopeEditor.innerHTML = createDefaultEditorHtml();
@@ -1454,6 +1469,7 @@ els.exportBtn.addEventListener('click', () => {
   });
 
   registerLivePreviewListeners();
+  initCollapsibleSections();
 
   loadTaskLibrary()
     .then(renderTaskSection)
