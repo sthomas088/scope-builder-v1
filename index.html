@@ -31,143 +31,163 @@
 
       <section class="workspace" aria-label="Scope builder workspace">
         <div class="left-panel" aria-label="Configuration panel">
-          <section class="card" aria-labelledby="cover-letter-toggle-heading">
-  <h2 id="cover-letter-toggle-heading">Cover Letter Type</h2>
-  <select id="coverLetterType" aria-label="Cover Letter Type">
-    <option value="none">None</option>
-    <option value="simple" selected>Simple</option>
-    <option value="standard">Standard</option>
-    <option value="expanded">Expanded</option>
-  </select>
-</section>
-
-          <section class="card" aria-labelledby="client-cover-heading">
-  <h2 id="client-cover-heading">Client / Cover Letter Information</h2>
-  <div class="grid">
-    <label>
-      Date
-      <input type="date" id="scopeDate" required />
-    </label>
-    <label>
-      Client
-      <input type="text" id="client" required />
-    </label>
-    <label>
-      Contact Name
-      <input type="text" id="contactName" />
-    </label>
-    <label>
-      Contact Email
-      <input type="email" id="contactEmail" />
-    </label>
-    <label>
-      Client Address Line 1
-      <input type="text" id="clientAddress" />
-    </label>
-    <label>
-      Client Address Line 2
-      <input type="text" id="clientAddress2" placeholder="City, State ZIP" />
-    </label>
-    <label class="full-width">
-      Subject Line
-      <input type="text" id="subjectLine" />
-    </label>
+          <section class="card collapsible-card expanded" aria-labelledby="cover-letter-toggle-heading">
+  <div class="card-header">
+    <span class="card-arrow">▸</span>
+    <h2 id="cover-letter-toggle-heading">Cover Letter Type</h2>
+  </div>
+  <div class="card-body">
+    <select id="coverLetterType" aria-label="Cover Letter Type">
+      <option value="none">None</option>
+      <option value="simple" selected>Simple</option>
+      <option value="standard">Standard</option>
+      <option value="expanded">Expanded</option>
+    </select>
   </div>
 </section>
 
-          <section class="card" aria-labelledby="signatories-heading">
-  <h2 id="signatories-heading">Signatories</h2>
-  <div class="grid">
-    <label>
-      Name
-      <input type="text" id="signatory1Name" />
-    </label>
-    <label>
-      Title
-      <input type="text" id="signatory1Title" />
-    </label>
-    <label>
-      Name
-      <input type="text" id="signatory2Name" />
-    </label>
-    <label>
-      Title
-      <input type="text" id="signatory2Title" />
-    </label>
+          <section class="card collapsible-card expanded" aria-labelledby="client-cover-heading">
+  <div class="card-header">
+    <span class="card-arrow">▸</span>
+    <h2 id="client-cover-heading">Client / Cover Letter Information</h2>
+  </div>
+  <div class="card-body">
+    <div class="grid">
+      <label>
+        Date
+        <input type="date" id="scopeDate" required />
+      </label>
+      <label>
+        Client
+        <input type="text" id="client" required />
+      </label>
+      <label>
+        Contact Name
+        <input type="text" id="contactName" />
+      </label>
+      <label>
+        Contact Email
+        <input type="email" id="contactEmail" />
+      </label>
+      <label>
+        Client Address Line 1
+        <input type="text" id="clientAddress" />
+      </label>
+      <label>
+        Client Address Line 2
+        <input type="text" id="clientAddress2" placeholder="City, State ZIP" />
+      </label>
+      <label class="full-width">
+        Subject Line
+        <input type="text" id="subjectLine" />
+      </label>
+    </div>
   </div>
 </section>
 
-          <section class="card" aria-labelledby="project-info-heading">
-            <h2 id="project-info-heading">Project Information</h2>
-            <div class="grid">
-              <label>
-                Project Name
-                <input type="text" id="projectName" required />
-              </label>
-              <label>
-                Project Address
-                <input type="text" id="projectAddress" />
-              </label>
-              <label>
-                Project City
-                <input type="text" id="projectCity" required />
-              </label>
-              <label>
-                Project County
-                <select id="projectCounty" required>
-                  <option value="">Select county</option>
-                  <option value="Los Angeles">Los Angeles</option>
-                  <option value="Orange">Orange</option>
-                  <option value="San Diego">San Diego</option>
-                  <option value="Riverside">Riverside</option>
-                  <option value="San Bernardino">San Bernardino</option>
-                  <option value="Ventura">Ventura</option>
-                  <option value="Santa Barbara">Santa Barbara</option>
-                  <option value="Imperial">Imperial</option>
-                  <option value="Kern">Kern</option>
-                  <option value="Custom">Custom</option>
-                </select>
-              </label>
-              <label id="customProjectCountyWrap" class="hidden">
-                Custom County Name
-                <input type="text" id="customProjectCounty" />
-              </label>
-              <label>
-                Project State
-                <input type="text" id="projectState" value="CA" required />
-              </label>
-              <label id="regionalFrameworkWrap">
-                Regional Framework / Area Plan
-                <select id="regionalFramework">
-                  <option value="None" selected>None</option>
-                  <option value="Western Riverside County MSHCP">Western Riverside County MSHCP</option>
-                  <option value="Santa Monica Mountains North Area Plan">Santa Monica Mountains North Area Plan</option>
-                  <option value="San Diego MSCP">San Diego MSCP</option>
-                  <option value="San Diego MHPA">San Diego MHPA</option>
-                  <option value="Coachella Valley MSHCP">Coachella Valley MSHCP</option>
-                  <option value="Desert Renewable Energy Conservation Plan (DRECP)">Desert Renewable Energy Conservation Plan (DRECP)</option>
-                  <option value="Kern County Valley Floor HCP">Kern County Valley Floor HCP</option>
-                  <option value="Custom">Custom</option>
-                </select>
-              </label>
-              <label id="customRegionalFrameworkWrap" class="hidden">
-                Custom Regional Framework / Area Plan
-                <input type="text" id="customRegionalFramework" />
-              </label>
-              <label id="acreageWrap" class="hidden">
-                Acreage
-                <input type="text" id="acreage" />
-              </label>
-              <label id="apnWrap" class="hidden">
-                APN
-                <input type="text" id="apn" />
-              </label>
-              <label id="generalProjectUnderstandingWrap" class="hidden full-width">
-                General Project Understanding
-                <textarea id="generalProjectUnderstanding" rows="4"></textarea>
-              </label>
-            </div>
-          </section>
+          <section class="card collapsible-card expanded" aria-labelledby="signatories-heading">
+  <div class="card-header">
+    <span class="card-arrow">▸</span>
+    <h2 id="signatories-heading">Signatories</h2>
+  </div>
+  <div class="card-body">
+    <div class="grid">
+      <label>
+        Name
+        <input type="text" id="signatory1Name" />
+      </label>
+      <label>
+        Title
+        <input type="text" id="signatory1Title" />
+      </label>
+      <label>
+        Name
+        <input type="text" id="signatory2Name" />
+      </label>
+      <label>
+        Title
+        <input type="text" id="signatory2Title" />
+      </label>
+    </div>
+  </div>
+</section>
+
+          <section class="card collapsible-card expanded" aria-labelledby="project-info-heading">
+  <div class="card-header">
+    <span class="card-arrow">▸</span>
+    <h2 id="project-info-heading">Project Information</h2>
+  </div>
+  <div class="card-body">
+    <div class="grid">
+      <label>
+        Project Name
+        <input type="text" id="projectName" required />
+      </label>
+      <label>
+        Project Address
+        <input type="text" id="projectAddress" />
+      </label>
+      <label>
+        Project City
+        <input type="text" id="projectCity" required />
+      </label>
+      <label>
+        Project County
+        <select id="projectCounty" required>
+          <option value="">Select county</option>
+          <option value="Los Angeles">Los Angeles</option>
+          <option value="Orange">Orange</option>
+          <option value="San Diego">San Diego</option>
+          <option value="Riverside">Riverside</option>
+          <option value="San Bernardino">San Bernardino</option>
+          <option value="Ventura">Ventura</option>
+          <option value="Santa Barbara">Santa Barbara</option>
+          <option value="Imperial">Imperial</option>
+          <option value="Kern">Kern</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </label>
+      <label id="customProjectCountyWrap" class="hidden">
+        Custom County Name
+        <input type="text" id="customProjectCounty" />
+      </label>
+      <label>
+        Project State
+        <input type="text" id="projectState" value="CA" required />
+      </label>
+      <label id="regionalFrameworkWrap">
+        Regional Framework / Area Plan
+        <select id="regionalFramework">
+          <option value="None" selected>None</option>
+          <option value="Western Riverside County MSHCP">Western Riverside County MSHCP</option>
+          <option value="Santa Monica Mountains North Area Plan">Santa Monica Mountains North Area Plan</option>
+          <option value="San Diego MSCP">San Diego MSCP</option>
+          <option value="San Diego MHPA">San Diego MHPA</option>
+          <option value="Coachella Valley MSHCP">Coachella Valley MSHCP</option>
+          <option value="Desert Renewable Energy Conservation Plan (DRECP)">Desert Renewable Energy Conservation Plan (DRECP)</option>
+          <option value="Kern County Valley Floor HCP">Kern County Valley Floor HCP</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </label>
+      <label id="customRegionalFrameworkWrap" class="hidden">
+        Custom Regional Framework / Area Plan
+        <input type="text" id="customRegionalFramework" />
+      </label>
+      <label id="acreageWrap" class="hidden">
+        Acreage
+        <input type="text" id="acreage" />
+      </label>
+      <label id="apnWrap" class="hidden">
+        APN
+        <input type="text" id="apn" />
+      </label>
+      <label id="generalProjectUnderstandingWrap" class="hidden full-width">
+        General Project Understanding
+        <textarea id="generalProjectUnderstanding" rows="4"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
 
           <section class="card" aria-labelledby="tasks-heading">
             <h2 id="tasks-heading">Bio Tasks</h2>
