@@ -880,8 +880,8 @@ h3 {
   color: #334155;
 }
 
-.task-category-header::before {
-  font-size: 1rem !important;
+.task-group-arrow {
+  font-size: 1rem;
 }
 
 .collapsible-card.expanded .card-arrow {
