@@ -880,7 +880,7 @@ h3 {
   color: #334155;
 }
 
-.task-category-header span {
+.task-category-header span:first-child {
   font-size: 1rem;
 }
 
